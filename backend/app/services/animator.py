@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 import torch
+import httpx
 
 from app.config import settings
 
@@ -21,8 +22,11 @@ class AvatarAnimator:
     """
     Avatar Animation Service.
     Supported engines (set AVATAR_ENGINE in .env):
-      - musetalk : MuseTalk V1.5 — persistent worker (models loaded once)
-      - simple   : ffmpeg static image + audio, no lip-sync
+      - musetalk        : MuseTalk V1.5 — persistent worker (models loaded once)
+      - musetalk_remote : MuseTalk on a remote GPU box over HTTP
+                          (run backend/musetalk_server.py there, set
+                          MUSETALK_REMOTE_URL / MUSETALK_REMOTE_TOKEN)
+      - simple          : ffmpeg static image + audio, no lip-sync
     """
 
     def __init__(self):
@@ -59,7 +63,26 @@ class AvatarAnimator:
         if self._initialised:
             return
 
-        if self.engine == "musetalk":
+        if self.engine == "musetalk_remote":
+            if not settings.MUSETALK_REMOTE_URL:
+                logger.warning(
+                    "AVATAR_ENGINE=musetalk_remote but MUSETALK_REMOTE_URL is empty. "
+                    "Falling back to simple animation."
+                )
+                self.engine = "simple"
+            elif not settings.MUSETALK_REMOTE_TOKEN:
+                logger.warning(
+                    "AVATAR_ENGINE=musetalk_remote but MUSETALK_REMOTE_TOKEN is empty. "
+                    "Falling back to simple animation."
+                )
+                self.engine = "simple"
+            else:
+                logger.info(
+                    f"MuseTalk remote engine → {settings.MUSETALK_REMOTE_URL} "
+                    f"(timeout={settings.MUSETALK_REMOTE_TIMEOUT}s)"
+                )
+
+        elif self.engine == "musetalk":
             self._musetalk_dir = self._find_dir(settings.MUSETALK_PATH, "scripts/inference.py")
             if self._musetalk_dir is None:
                 logger.warning(
@@ -264,6 +287,8 @@ class AvatarAnimator:
         try:
             if self.engine == "musetalk":
                 return await self._animate_musetalk(avatar_image_path, audio_path, output_path)
+            elif self.engine == "musetalk_remote":
+                return await self._animate_musetalk_remote(avatar_image_path, audio_path, output_path)
             else:
                 return await self._animate_simple(avatar_image_path, audio_path, output_path)
         except Exception as e:
@@ -289,6 +314,61 @@ class AvatarAnimator:
         await self._worker_infer(avatar_path, audio_path, output_path, coord_cache)
 
         logger.info(f"MuseTalk animation done: {output_path}")
+        return output_path
+
+    # ── Remote MuseTalk over HTTP ─────────────────────────────────────────────
+
+    async def _animate_musetalk_remote(
+        self,
+        avatar_path: str,
+        audio_path: str,
+        output_path: str,
+    ) -> str:
+        """
+        POST image+audio to the remote GPU server (musetalk_server.py) and
+        stream the returned mp4 to output_path. Any HTTP/network error raises,
+        letting animate() fall back to the simple engine.
+        """
+        # Stable per-avatar key so the server can cache face landmarks
+        # across calls (mirrors the local coord-cache behaviour).
+        avatar_key = hashlib.md5(str(Path(avatar_path).resolve()).encode()).hexdigest()
+
+        base = settings.MUSETALK_REMOTE_URL.rstrip("/")
+        headers = {"Authorization": f"Bearer {settings.MUSETALK_REMOTE_TOKEN}"}
+
+        async with httpx.AsyncClient(timeout=settings.MUSETALK_REMOTE_TIMEOUT) as client:
+            # Liveness probe first — distinguish "server down" (fallback fast)
+            # from "inference slow" (wait inside the timeout budget).
+            try:
+                probe = await client.get(f"{base}/health", headers=headers)
+            except httpx.HTTPError as e:
+                raise RuntimeError(f"MuseTalk remote unreachable: {e}") from e
+
+            if probe.status_code == 401:
+                raise RuntimeError("MuseTalk remote rejected the token (401)")
+            if probe.status_code != 200:
+                raise RuntimeError(f"MuseTalk remote health check failed: HTTP {probe.status_code}")
+            health = probe.json()
+            if health.get("status") != "ready":
+                raise RuntimeError(f"MuseTalk remote not ready: {health.get('status')}")
+
+            with open(avatar_path, "rb") as img_f, open(audio_path, "rb") as aud_f:
+                files = {
+                    "image": (Path(avatar_path).name, img_f, "application/octet-stream"),
+                    "audio": (Path(audio_path).name, aud_f, "application/octet-stream"),
+                }
+                data = {"image_hash": avatar_key}
+                resp = await client.post(f"{base}/animate", headers=headers, files=files, data=data)
+
+            if resp.status_code != 200:
+                detail = resp.text[:500]
+                raise RuntimeError(f"MuseTalk remote HTTP {resp.status_code}: {detail}")
+
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "wb") as f:
+            f.write(resp.content)
+
+        logger.info(f"MuseTalk remote animation done: {output_path}")
         return output_path
 
     # ── Simple ffmpeg fallback ────────────────────────────────────────────────

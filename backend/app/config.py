@@ -71,10 +71,23 @@ class Settings(BaseSettings):
     LLM_REASONING_EFFORT: str = ""
 
     # Avatar Engine
-    AVATAR_ENGINE: str = "musetalk"  # musetalk, simple
+    # musetalk         : local MuseTalk worker (GPU on this machine)
+    # musetalk_remote  : MuseTalk served over HTTP by a remote GPU box
+    #                    (e.g. AutoDL vGPU running backend/musetalk_server.py)
+    # simple           : ffmpeg static image + audio, no lip-sync
+    AVATAR_ENGINE: str = "musetalk"  # musetalk, musetalk_remote, simple
     AVATAR_RESOLUTION: int = 512
     AVATAR_FPS: int = 25
     MUSETALK_PATH: str = "models/MuseTalk"
+
+    # Remote MuseTalk (AVATAR_ENGINE=musetalk_remote)
+    # URL of the GPU box's musetalk_server.py (AutoDL custom-service URL or
+    # an SSH-tunnel localhost address). Token must match its MUSETALK_TOKEN.
+    MUSETALK_REMOTE_URL: str = ""
+    MUSETALK_REMOTE_TOKEN: str = ""
+    # Per-request timeout in seconds: GPU inference is ~5-15s/sentence, but
+    # add headroom for cold start + network (models may still be loading).
+    MUSETALK_REMOTE_TIMEOUT: int = 120
 
     # STT Configuration
     # large-v3-turbo: best 2026 sweet spot — ~216x real-time on GPU, multilingual,
