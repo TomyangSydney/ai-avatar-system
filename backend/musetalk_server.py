@@ -89,18 +89,14 @@ def _load_models() -> None:
     import torch  # local import so --help / tests don't pay for torch import
     from transformers import WhisperModel
 
-    from musetalk.utils.audio_processor import AudioProcessor
-    from musetalk.utils.face_parsing import FaceParsing
-    from musetalk.utils.utils import load_all_model
-
     try:
+        # Locate the clone and put it on sys.path BEFORE importing musetalk.*
+        # (order matters — importing first fails with ModuleNotFoundError).
         musetalk_dir = _find_musetalk_dir()
         sys.path.insert(0, str(musetalk_dir))
-        # Re-import now that sys.path includes the clone (when started from
-        # the repo root rather than inside the clone).
-        import importlib
-        import musetalk.utils.utils as mu
-        importlib.reload(mu)
+
+        from musetalk.utils.audio_processor import AudioProcessor
+        from musetalk.utils.face_parsing import FaceParsing
         from musetalk.utils.utils import load_all_model as _lam
 
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
