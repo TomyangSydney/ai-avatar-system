@@ -35,7 +35,9 @@ openai>=1.50.0
 torch==2.2.0
 torchvision==0.17.0
 torchaudio==2.2.0
-transformers==4.37.2
+# chatterbox-tts requires transformers==4.46.3; the old 4.37.2 pin made
+# pip resolution impossible. 4.46.x is API-compatible for our usage.
+transformers>=4.46.3
 accelerate==0.26.1
 diffusers==0.32.2
 numpy==1.26.3
