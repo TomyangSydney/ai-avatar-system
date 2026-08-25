@@ -94,6 +94,10 @@ def _load_models() -> None:
         # (order matters — importing first fails with ModuleNotFoundError).
         musetalk_dir = _find_musetalk_dir()
         sys.path.insert(0, str(musetalk_dir))
+        # MuseTalk internals use cwd-relative model paths (e.g.
+        # './models/face-parse-bisent/...'), so mirror the worker's behaviour
+        # and run from inside the clone.
+        os.chdir(musetalk_dir)
 
         from musetalk.utils.audio_processor import AudioProcessor
         from musetalk.utils.face_parsing import FaceParsing
