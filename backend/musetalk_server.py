@@ -118,6 +118,7 @@ def _load_models() -> None:
             pe = pe.half()
             vae.vae = vae.vae.half()
             unet.model = unet.model.half()
+            STATE["float16"] = True
             logger.info("float16 enabled — ~2x faster on GPU")
         pe = pe.to(device)
         vae.vae = vae.vae.to(device)
