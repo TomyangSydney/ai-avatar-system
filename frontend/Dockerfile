@@ -20,8 +20,9 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies. npm ci requires a lockfile — upstream doesn't ship
+# one, so fall back to npm install when it's absent.
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Copy application code
 COPY . .
