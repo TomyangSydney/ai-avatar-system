@@ -33,7 +33,7 @@ import threading
 from pathlib import Path
 
 import uvicorn
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -48,7 +48,7 @@ _MODELS: dict = {}
 
 # ── auth ──────────────────────────────────────────────────────────────────────
 
-def _check_token(authorization: str) -> None:
+def _check_token(authorization: str = Header(...)) -> None:
     """Bearer-token guard. 401 on mismatch; also 500-ish if no token was set."""
     if not TOKEN:
         raise HTTPException(status_code=500, detail="MUSETALK_TOKEN env var not set on server")
@@ -281,7 +281,7 @@ async def animate(
     image: UploadFile = File(...),
     audio: UploadFile = File(...),
     image_hash: str = Form(""),
-    authorization: str = Depends(_check_token),
+    authorization: str = Header(..., description="Bearer token"),
 ):
     if not STATE["ready"]:
         detail = STATE["error"] or "models still loading"
