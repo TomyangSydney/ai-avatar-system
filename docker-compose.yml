@@ -151,6 +151,19 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - LLM_MODEL=${LLM_MODEL:-claude-sonnet-4-6}
+      - AVATAR_ENGINE=${AVATAR_ENGINE:-musetalk}
+      - MUSETALK_REMOTE_URL=${MUSETALK_REMOTE_URL:-}
+      - MUSETALK_REMOTE_TOKEN=${MUSETALK_REMOTE_TOKEN:-}
+      - MUSETALK_REMOTE_TIMEOUT=${MUSETALK_REMOTE_TIMEOUT:-120}
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - TTS_PROVIDER=${TTS_PROVIDER:-chatterbox}
     volumes:
       - ./backend:/app
       - avatar_cache:/tmp/avatars
