@@ -24,8 +24,13 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies. chatterbox-tts is excluded here and installed
+# with --no-deps below: its wheels hard-pin torch==2.6.0/diffusers==0.29.0,
+# which conflicts with this project's torch 2.2 stack. Its other runtime
+# imports are listed explicitly in requirements.txt.
+RUN grep -v '^chatterbox-tts' requirements.txt > req.nodeps.txt && \
+    pip install --no-cache-dir -r req.nodeps.txt && \
+    pip install --no-cache-dir --no-deps chatterbox-tts==0.1.2
 
 # Install PyTorch with CUDA 11.8 (matches base image)
 RUN pip install --no-cache-dir \
