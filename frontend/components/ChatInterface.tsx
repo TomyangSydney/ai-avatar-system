@@ -60,12 +60,12 @@ function detectEmotion(text: string): string {
 }
 
 const EMOTION_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  happy:   { label: '😄 Happy',   color: 'text-yellow-300', bg: 'bg-yellow-500/20 border-yellow-500/30' },
-  angry:   { label: '😠 Angry',   color: 'text-red-300',    bg: 'bg-red-500/20 border-red-500/30' },
-  sad:     { label: '😢 Sad',     color: 'text-blue-300',   bg: 'bg-blue-500/20 border-blue-500/30' },
-  excited: { label: '🤩 Excited', color: 'text-purple-300', bg: 'bg-purple-500/20 border-purple-500/30' },
-  curious: { label: '🤔 Curious', color: 'text-cyan-300',   bg: 'bg-cyan-500/20 border-cyan-500/30' },
-  neutral: { label: '😊 Neutral', color: 'text-gray-300',   bg: 'bg-gray-500/20 border-gray-500/30' },
+  happy:   { label: '😄 开心',   color: 'text-yellow-300', bg: 'bg-yellow-500/20 border-yellow-500/30' },
+  angry:   { label: '😠 生气',   color: 'text-red-300',    bg: 'bg-red-500/20 border-red-500/30' },
+  sad:     { label: '😢 难过',   color: 'text-blue-300',   bg: 'bg-blue-500/20 border-blue-500/30' },
+  excited: { label: '🤩 兴奋', color: 'text-purple-300', bg: 'bg-purple-500/20 border-purple-500/30' },
+  curious: { label: '🤔 好奇', color: 'text-cyan-300',   bg: 'bg-cyan-500/20 border-cyan-500/30' },
+  neutral: { label: '😊 平静', color: 'text-gray-300',   bg: 'bg-gray-500/20 border-gray-500/30' },
 }
 
 // Deterministic per-bar heights — a static varied pattern instead of
@@ -123,7 +123,7 @@ function IdleAvatar({ imageUrl }: { imageUrl: string | null }) {
                         flex items-center justify-center border border-white/10 animate-pulse-slow">
           <Video size={36} className="text-primary-400" />
         </div>
-        <p className="text-gray-500 text-sm">Avatar video will appear here</p>
+        <p className="text-gray-500 text-sm">数字人视频将显示在这里</p>
       </div>
     )
   }
@@ -138,7 +138,7 @@ function IdleAvatar({ imageUrl }: { imageUrl: string | null }) {
       {/* Avatar image with breathing scale */}
       <img
         src={imageUrl}
-        alt="Avatar idle"
+        alt="数字人待机中"
         className="avatar-idle relative z-10 w-full h-full object-cover"
         style={{ borderRadius: '0.75rem' }}
       />
@@ -153,7 +153,7 @@ function IdleAvatar({ imageUrl }: { imageUrl: string | null }) {
       <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 bg-black/40 backdrop-blur-sm
                       px-2 py-1 rounded-full border border-white/10">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="text-[10px] text-gray-300 font-medium tracking-wide">IDLE</span>
+        <span className="text-[10px] text-gray-300 font-medium tracking-wide">待机</span>
       </div>
     </div>
   )
@@ -169,7 +169,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
   const [ws, setWs] = useState<WebSocket | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [statusMsg, setStatusMsg] = useState('Almost ready…')
+  const [statusMsg, setStatusMsg] = useState('即将就绪…')
   const [isTyping, setIsTyping] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [recordingLevel, setRecordingLevel] = useState(0)
@@ -228,10 +228,10 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
         if (av) {
           setAvatarImageUrl(av.thumbnail_url || av.image_url || null)
         } else {
-          toast.error('Could not load avatar image')
+          toast.error('无法加载数字人头像')
         }
       })
-      .catch(() => toast.error('Could not load avatar image'))
+      .catch(() => toast.error('无法加载数字人头像'))
   }, [avatarId])
 
   // ── Chunk queue player ───────────────────────────────────────────────────
@@ -346,7 +346,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
       await loadHistory(data.id)
     },
     onError: () => {
-      toast.error('Failed to start session')
+      toast.error('会话启动失败')
       setConnectionStatus('disconnected')
     },
   })
@@ -361,7 +361,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
       setConnectionStatus('connected')
       setWsConnected(true)
       if (wasFreshConnect) {
-        toast.success('Connected to avatar!', { icon: '✨' })
+        toast.success('已连接到数字人！', { icon: '✨' })
       }
       if (voiceId) {
         websocket.send(JSON.stringify({ type: 'set_voice', voice_id: voiceId }))
@@ -381,7 +381,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
       // 4401 = backend rejected the handshake (no token, bad token, or not the
       // session owner). No point reconnecting — surface a clear error instead.
       if (event.code === WS_AUTH_REJECT_CODE) {
-        toast.error('Not authorised to join this session — please sign in again.')
+        toast.error('无权加入此会话，请重新登录。')
         setReconnectStalled(true)
         return
       }
@@ -389,7 +389,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
       const sidNow = sessionIdRef.current
       if (!sidNow) return
       if (reconnectAttemptsRef.current >= MAX_WS_RECONNECT_ATTEMPTS) {
-        toast.error('Lost connection to avatar.')
+        toast.error('与数字人的连接已断开。')
         setReconnectStalled(true)
         return
       }
@@ -477,7 +477,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
         // "stuck" and never the avatar. Only block the view pre-first-chunk.
         if (!isPlayingRef.current) {
           setIsProcessing(true)
-          setStatusMsg(data.message || 'Processing…')
+          setStatusMsg(data.message || '处理中…')
         }
         break
 
@@ -519,7 +519,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
     if (!inputText.trim() || !ws || !sessionId) return
     if (ws.readyState !== WebSocket.OPEN) {
       // send() on a CONNECTING socket throws; on CLOSED it silently drops.
-      toast.error('Not connected to the avatar yet — try again in a moment.')
+      toast.error('尚未连接到数字人，请稍后再试。')
       return
     }
     const emotion = detectEmotion(inputText)
@@ -563,16 +563,16 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
   const exportConversation = () => {
     if (messages.length === 0) return
     const lines = messages.map(m =>
-      `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.role === 'user' ? 'You' : 'Avatar'}: ${m.content}`
+      `[${new Date(m.timestamp).toLocaleTimeString()}] ${m.role === 'user' ? '我' : '数字人'}: ${m.content}`
     )
     const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `conversation-${new Date().toISOString().slice(0, 10)}.txt`
+    a.download = `对话记录-${new Date().toISOString().slice(0, 10)}.txt`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Conversation exported')
+    toast.success('对话已导出')
   }
 
   const changeLanguage = (lang: string) => {
@@ -628,7 +628,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
       mediaRecorderRef.current = mediaRecorder
       setIsRecording(true)
     } catch {
-      toast.error('Failed to access microphone')
+      toast.error('无法访问麦克风')
     }
   }
 
@@ -646,7 +646,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
 
   const copyMessage = (content: string) => {
     navigator.clipboard.writeText(content)
-    toast.success('Copied!', { duration: 1500 })
+    toast.success('已复制！', { duration: 1500 })
   }
 
   const startEditMessage = (m: Message) => {
@@ -662,7 +662,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
   const saveEditMessage = async (id: string) => {
     const next = editDraft.trim()
     if (!next) {
-      toast.error('Message cannot be empty')
+      toast.error('消息不能为空')
       return
     }
     // Optimistic update — revert if the backend rejects
@@ -672,23 +672,23 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
     setEditDraft('')
     try {
       await api.editMessage(id, next)
-      toast.success('Message updated', { duration: 1500 })
+      toast.success('消息已更新', { duration: 1500 })
     } catch {
       setMessages(previous)
-      toast.error('Could not update message')
+      toast.error('无法更新消息')
     }
   }
 
   const deleteMessage = async (id: string) => {
-    if (!window.confirm('Delete this message?')) return
+    if (!window.confirm('删除这条消息？')) return
     const previous = messages
     setMessages(prev => prev.filter(m => m.id !== id))
     try {
       await api.deleteMessage(id)
-      toast.success('Message deleted', { duration: 1500 })
+      toast.success('消息已删除', { duration: 1500 })
     } catch {
       setMessages(previous)
-      toast.error('Could not delete message')
+      toast.error('无法删除消息')
     }
   }
 
@@ -841,7 +841,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                   : connectionStatus === 'connecting' ? 'processing'
                   : 'offline'
                 }`} />
-                <span className="text-gray-400 capitalize">{connectionStatus}</span>
+                <span className="text-gray-400 capitalize">{connectionStatus === 'connected' ? '已连接' : connectionStatus === 'connecting' ? '连接中…' : '已断开'}</span>
               </div>
               {reconnectStalled && (
                 <button
@@ -849,11 +849,11 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                   className="flex items-center gap-1 text-xs text-primary-300 hover:text-white
                              px-2 py-1 rounded-md border border-primary-500/40 hover:bg-primary-500/20
                              transition-colors"
-                  title="Reconnect"
-                  aria-label="Reconnect to avatar"
+                  title="重新连接"
+                  aria-label="重新连接数字人"
                 >
                   <Plug size={11} />
-                  Reconnect
+                  重新连接
                 </button>
               )}
             </div>
@@ -866,7 +866,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                   value={language}
                   onChange={(e) => changeLanguage(e.target.value)}
                   className="bg-transparent text-xs text-gray-300 focus:outline-none cursor-pointer"
-                  title="TTS language"
+                  title="TTS 语言"
                 >
                   {CHAT_LANGUAGES.map(l => (
                     <option key={l.code} value={l.code}>{l.label}</option>
@@ -875,15 +875,15 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
               </div>
 
               {(showVideo || isProcessing) && (
-                <button onClick={resetVideo} className="btn-icon" title="Reset video" aria-label="Reset video">
+                <button onClick={resetVideo} className="btn-icon" title="重置视频" aria-label="重置视频">
                   <RotateCcw size={15} />
                 </button>
               )}
               <button
                 onClick={() => setIsMuted(m => !m)}
                 className={`btn-icon ${isMuted ? 'text-red-400 border-red-500/30' : ''}`}
-                title={isMuted ? 'Unmute (⌘E)' : 'Mute (⌘E)'}
-                aria-label={isMuted ? 'Unmute avatar' : 'Mute avatar'}
+                title={isMuted ? '取消静音 (⌘E)' : '静音 (⌘E)'}
+                aria-label={isMuted ? '取消数字人静音' : '数字人静音'}
                 aria-pressed={isMuted}
               >
                 {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
@@ -891,8 +891,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
               <button
                 onClick={() => setShowShortcuts(true)}
                 className="btn-icon"
-                title="Keyboard shortcuts (?)"
-                aria-label="Show keyboard shortcuts"
+                title="键盘快捷键 (?)"
+                aria-label="显示键盘快捷键"
               >
                 <Keyboard size={15} />
               </button>
@@ -904,7 +904,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
         {messages.length > 0 && (
           <div className="glass-card px-4 py-3 flex items-center gap-3 rounded-xl animate-slide-up">
             <Activity size={14} className="text-primary-400 flex-shrink-0" />
-            <span className="text-xs text-gray-500 flex-shrink-0">Emotion detected:</span>
+            <span className="text-xs text-gray-500 flex-shrink-0">检测到的情绪：</span>
             <div className="flex flex-wrap gap-2">
               {messages.slice(-1).map(m => {
                 const e = m.emotion || 'neutral'
@@ -925,7 +925,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
           <div className="flex items-center gap-2">
             <MessageCircle size={16} className="text-primary-400" />
-            <span className="font-semibold text-white">Conversation</span>
+            <span className="font-semibold text-white">对话</span>
           </div>
           <div className="flex items-center gap-2">
             {latencyMs !== null && (
@@ -936,14 +936,14 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
             )}
             <div className="flex items-center gap-1.5 text-xs text-gray-500">
               <Zap size={12} className="text-primary-400" />
-              <span>{messages.length} messages</span>
+              <span>{messages.length} 条消息</span>
             </div>
             {messages.length > 0 && (
               <button
                 onClick={exportConversation}
                 className="btn-icon"
-                title="Export conversation"
-                aria-label="Export conversation as text"
+                title="导出对话"
+                aria-label="导出对话为文本"
               >
                 <Download size={13} />
               </button>
@@ -959,8 +959,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                 <Sparkles size={28} className="text-primary-400" />
               </div>
               <div>
-                <p className="text-white font-medium mb-1">Start the conversation</p>
-                <p className="text-gray-500 text-sm">Type a message or press the mic button</p>
+                <p className="text-white font-medium mb-1">打个招呼试试吧</p>
+                <p className="text-gray-500 text-sm">输入消息或点击麦克风按钮</p>
               </div>
             </div>
           ) : (
@@ -980,7 +980,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                       : 'bg-gradient-to-br from-primary-600 to-primary-800'
                     }`}
                   >
-                    {isUser ? 'U' : 'AI'}
+                    {isUser ? '我' : 'AI'}
                   </div>
                   <div className={`max-w-[85%] group ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                     {editingMessageId === message.id ? (
@@ -1005,14 +1005,14 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                           className="w-full px-3 py-2 rounded-2xl bg-surface-700/80 border border-primary-500/40
                                      text-white text-sm placeholder:text-gray-600 focus:outline-none
                                      focus:ring-2 focus:ring-primary-500/50 resize-none"
-                          aria-label="Edit message"
+                          aria-label="编辑消息"
                         />
                         <div className="flex items-center gap-1.5 justify-end">
                           <button
                             onClick={cancelEditMessage}
                             className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded-md hover:bg-white/5"
                           >
-                            Cancel
+                            取消
                           </button>
                           <button
                             onClick={() => saveEditMessage(message.id)}
@@ -1020,7 +1020,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                                        flex items-center gap-1"
                           >
                             <Check size={11} />
-                            Save
+                            保存
                           </button>
                         </div>
                       </div>
@@ -1039,8 +1039,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                             onClick={() => copyMessage(message.content)}
                             className="w-6 h-6 rounded-full bg-surface-600 border border-white/10
                                        flex items-center justify-center hover:bg-surface-500"
-                            title="Copy"
-                            aria-label="Copy message"
+                            title="复制"
+                            aria-label="复制消息"
                           >
                             <Copy size={10} className="text-gray-400" />
                           </button>
@@ -1050,8 +1050,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                                 onClick={() => startEditMessage(message)}
                                 className="w-6 h-6 rounded-full bg-surface-600 border border-white/10
                                            flex items-center justify-center hover:bg-surface-500"
-                                title="Edit"
-                                aria-label="Edit message"
+                                title="编辑"
+                                aria-label="编辑消息"
                               >
                                 <Pencil size={10} className="text-gray-400" />
                               </button>
@@ -1059,8 +1059,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                                 onClick={() => deleteMessage(message.id)}
                                 className="w-6 h-6 rounded-full bg-surface-600 border border-white/10
                                            flex items-center justify-center hover:bg-red-600/30"
-                                title="Delete"
-                                aria-label="Delete message"
+                                title="删除"
+                                aria-label="删除消息"
                               >
                                 <Trash2 size={10} className="text-gray-400" />
                               </button>
@@ -1116,9 +1116,9 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
         <div className="border-t border-white/8 px-4 py-3">
           {isRecording && (
             <div className="flex items-center gap-2 mb-3 px-2">
-              <span className="text-xs text-red-400 font-medium animate-pulse">REC</span>
+              <span className="text-xs text-red-400 font-medium animate-pulse">录音中</span>
               <WaveformBars active={isRecording} />
-              <span className="text-xs text-gray-500 ml-auto">Tap stop when done</span>
+              <span className="text-xs text-gray-500 ml-auto">说完后点击停止</span>
             </div>
           )}
 
@@ -1126,7 +1126,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
             <button
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isProcessing}
-              aria-label={isRecording ? 'Stop recording' : 'Start voice recording'}
+              aria-label={isRecording ? '停止录音' : '开始语音输入'}
               aria-pressed={isRecording}
               className={`relative flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
                 transition-all duration-200 active:scale-95
@@ -1150,8 +1150,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
                 }}
-                placeholder={isRecording ? 'Recording…' : 'Message your avatar… (Enter to send)'}
-                aria-label="Message your avatar"
+                placeholder={isRecording ? '录音中…' : '输入消息，Enter 发送…'}
+                aria-label="输入消息"
                 disabled={isProcessing || isRecording}
                 rows={1}
                 className="w-full px-4 py-2.5 rounded-xl bg-surface-700/80 border border-white/10 text-white text-sm
@@ -1164,8 +1164,8 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
             {(isProcessing || isSpeaking) ? (
               <button
                 onClick={stopGeneration}
-                aria-label="Stop generating"
-                title="Stop"
+                aria-label="停止生成"
+                title="停止"
                 className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-600 hover:bg-red-500
                            flex items-center justify-center text-white shadow-[0_0_18px_rgba(239,68,68,0.4)]
                            transition-all duration-200 active:scale-95"
@@ -1176,7 +1176,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
               <button
                 onClick={sendMessage}
                 disabled={!inputText.trim() || isRecording}
-                aria-label="Send message"
+                aria-label="发送消息"
                 className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-600
                            flex items-center justify-center text-white hover:shadow-glow
                            disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
@@ -1187,7 +1187,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
           </div>
 
           <p className="text-xs text-gray-600 text-center mt-2">
-            Shift+Enter for new line · Mic for voice · <kbd className="px-1 py-0.5 rounded bg-surface-700 text-gray-500">?</kbd> for shortcuts
+            Shift+Enter 换行 · 麦克风语音输入 · 按 <kbd className="px-1 py-0.5 rounded bg-surface-700 text-gray-500">?</kbd> 查看快捷键
           </p>
         </div>
       </div>
@@ -1208,12 +1208,12 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Keyboard size={18} className="text-primary-400" />
-                <h2 id="kbd-title" className="text-lg font-bold text-white">Keyboard shortcuts</h2>
+                <h2 id="kbd-title" className="text-lg font-bold text-white">键盘快捷键</h2>
               </div>
               <button
                 onClick={() => setShowShortcuts(false)}
                 className="btn-icon"
-                aria-label="Close shortcuts"
+                aria-label="关闭快捷键面板"
               >
                 <X size={14} />
               </button>
@@ -1221,11 +1221,11 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
             <div className="divider mb-4" />
             <ul className="space-y-2.5 text-sm">
               {[
-                { keys: ['Enter'], desc: 'Send message' },
-                { keys: ['Shift', 'Enter'], desc: 'New line in message' },
-                { keys: ['Esc'], desc: 'Cancel editing a message' },
-                { keys: ['⌘', 'E'], desc: 'Mute / unmute avatar' },
-                { keys: ['?'], desc: 'Toggle this shortcuts panel' },
+                { keys: ['Enter'], desc: '发送消息' },
+                { keys: ['Shift', 'Enter'], desc: '消息内换行' },
+                { keys: ['Esc'], desc: '取消编辑消息' },
+                { keys: ['⌘', 'E'], desc: '数字人静音 / 取消静音' },
+                { keys: ['?'], desc: '打开或关闭此快捷键面板' },
               ].map(({ keys, desc }) => (
                 <li key={desc} className="flex items-center justify-between gap-3">
                   <span className="text-gray-300">{desc}</span>
@@ -1243,7 +1243,7 @@ export function ChatInterface({ avatarId, voiceId, resumeSessionId, onSessionCre
               ))}
             </ul>
             <p className="text-xs text-gray-500 mt-4">
-              On Windows/Linux, use <kbd className="px-1 py-0.5 rounded bg-surface-700">Ctrl</kbd> in place of <kbd className="px-1 py-0.5 rounded bg-surface-700">⌘</kbd>.
+              在 Windows/Linux 上，请用 <kbd className="px-1 py-0.5 rounded bg-surface-700">Ctrl</kbd> 代替 <kbd className="px-1 py-0.5 rounded bg-surface-700">⌘</kbd>。
             </p>
           </div>
         </div>

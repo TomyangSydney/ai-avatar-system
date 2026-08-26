@@ -17,7 +17,7 @@ export function AvatarUpload() {
   const uploadMutation = useMutation({
     mutationFn: (formData: FormData) => api.uploadAvatar(formData),
     onSuccess: () => {
-      toast.success('Avatar uploaded!', { icon: '✨' })
+      toast.success('上传成功！', { icon: '✨' })
       setPreview(null)
       setName('')
       setFileName('')
@@ -25,7 +25,7 @@ export function AvatarUpload() {
       queryClient.invalidateQueries({ queryKey: ['avatars'] })
     },
     onError: () => {
-      toast.error('Upload failed — please try again')
+      toast.error('上传失败，请重试')
     },
   })
 
@@ -50,12 +50,12 @@ export function AvatarUpload() {
     setError(null)
 
     if (!file.type.startsWith('image/')) {
-      setError('Please upload a JPG, PNG, or WEBP image.')
+      setError('请上传 JPG、PNG 或 WEBP 格式的图片。')
       return
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError('File must be under 10 MB.')
+      setError('文件大小不能超过 10 MB。')
       return
     }
 
@@ -69,7 +69,7 @@ export function AvatarUpload() {
 
   const handleSubmit = () => {
     if (!preview || !name.trim()) {
-      setError('Please give your avatar a name.')
+      setError('请为你的数字人填写名称。')
       return
     }
 
@@ -93,21 +93,21 @@ export function AvatarUpload() {
     <div className="card flex flex-col gap-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white">Upload Avatar</h2>
-        <p className="text-sm text-gray-500 mt-0.5">JPG · PNG · WEBP · up to 10 MB</p>
+        <h2 className="text-xl font-bold text-white">上传数字人</h2>
+        <p className="text-sm text-gray-500 mt-0.5">JPG · PNG · WEBP · 最大 10 MB</p>
       </div>
 
       <div className="divider" />
 
       {/* Name field */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-gray-300">Avatar Name</label>
+        <label className="text-sm font-medium text-gray-300">数字人名称</label>
         <input
           type="text"
           value={name}
           onChange={(e) => { setName(e.target.value); setError(null) }}
           className="input-field"
-          placeholder="e.g. Alex, News Anchor, CEO…"
+          placeholder="例如：Alex、新闻主播、CEO…"
           maxLength={60}
         />
       </div>
@@ -151,16 +151,16 @@ export function AvatarUpload() {
 
             <div>
               <p className="text-white font-semibold text-base mb-1">
-                {dragActive ? 'Drop to upload' : 'Drag & drop your photo'}
+                {dragActive ? '松开即可上传' : '拖拽照片到这里'}
               </p>
               <p className="text-gray-500 text-sm">
-                or <span className="text-primary-400 font-medium underline underline-offset-2">click to browse</span>
+                或 <span className="text-primary-400 font-medium underline underline-offset-2">点击选择文件</span>
               </p>
             </div>
 
             {/* Tips */}
             <div className="flex flex-wrap justify-center gap-2 mt-2">
-              {['Clear face', 'Good lighting', 'Front-facing'].map(tip => (
+              {['五官清晰', '光线充足', '正面照'].map(tip => (
                 <span key={tip} className="badge-purple text-xs">{tip}</span>
               ))}
             </div>
@@ -171,7 +171,7 @@ export function AvatarUpload() {
         <div className="relative rounded-2xl overflow-hidden border border-white/10 group">
           <img
             src={preview}
-            alt="Avatar preview"
+            alt="数字人预览"
             className="w-full max-h-64 object-cover"
           />
           {/* Overlay */}
@@ -214,12 +214,12 @@ export function AvatarUpload() {
           {uploadMutation.isPending ? (
             <>
               <Loader2 size={18} className="animate-spin" />
-              Uploading & Processing…
+              上传并处理中…
             </>
           ) : (
             <>
               <Upload size={18} />
-              Upload Avatar
+              上传数字人
             </>
           )}
         </button>
@@ -228,7 +228,7 @@ export function AvatarUpload() {
       {/* Processing note */}
       {uploadMutation.isPending && (
         <p className="text-xs text-center text-gray-500 animate-pulse">
-          Detecting face · Cropping · Optimizing…
+          正在检测人脸 · 裁剪 · 优化…
         </p>
       )}
     </div>

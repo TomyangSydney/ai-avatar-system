@@ -14,10 +14,10 @@ interface AvatarListProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
-  ready:      { label: 'Ready',      color: 'text-green-400',  dot: 'bg-green-400' },
-  processing: { label: 'Processing', color: 'text-amber-400',  dot: 'bg-amber-400 animate-pulse' },
-  failed:     { label: 'Failed',     color: 'text-red-400',    dot: 'bg-red-400' },
-  pending:    { label: 'Pending',    color: 'text-gray-400',   dot: 'bg-gray-500' },
+  ready:      { label: '就绪',      color: 'text-green-400',  dot: 'bg-green-400' },
+  processing: { label: '处理中', color: 'text-amber-400',  dot: 'bg-amber-400 animate-pulse' },
+  failed:     { label: '失败',     color: 'text-red-400',    dot: 'bg-red-400' },
+  pending:    { label: '等待中',    color: 'text-gray-400',   dot: 'bg-gray-500' },
 }
 
 function AvatarCardSkeleton() {
@@ -48,19 +48,19 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
   const deleteMutation = useMutation({
     mutationFn: (avatarId: string) => api.deleteAvatar(avatarId),
     onSuccess: () => {
-      toast.success('Avatar deleted')
+      toast.success('数字人已删除')
       queryClient.invalidateQueries({ queryKey: ['avatars'] })
     },
-    onError: () => toast.error('Failed to delete avatar'),
+    onError: () => toast.error('删除数字人失败'),
   })
 
   const unsetVoiceMutation = useMutation({
     mutationFn: (avatarId: string) => api.unsetAvatarVoice(avatarId),
     onSuccess: () => {
-      toast.success('Voice unassigned')
+      toast.success('已解除声音绑定')
       queryClient.invalidateQueries({ queryKey: ['avatars'] })
     },
-    onError: () => toast.error('Failed to unassign voice'),
+    onError: () => toast.error('解除声音绑定失败'),
   })
 
   const openEditor = (avatar: Avatar) => {
@@ -81,10 +81,10 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
       }
       await Promise.all(saves)
       queryClient.invalidateQueries({ queryKey: ['avatars'] })
-      toast.success('Saved', { icon: '✅' })
+      toast.success('已保存', { icon: '✅' })
       setEditingId(null)
     } catch {
-      toast.error('Failed to save')
+      toast.error('保存失败')
     } finally {
       setIsSaving(false)
     }
@@ -95,12 +95,12 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Your Avatars</h2>
+          <h2 className="text-xl font-bold text-white">我的数字人</h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            {avatars?.length ?? 0} avatar{(avatars?.length ?? 0) !== 1 ? 's' : ''}
+            共 {avatars?.length ?? 0} 个
           </p>
         </div>
-        <button onClick={() => refetch()} className="btn-icon" title="Refresh">
+        <button onClick={() => refetch()} className="btn-icon" title="刷新">
           <RefreshCw size={15} />
         </button>
       </div>
@@ -117,8 +117,8 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
             <User size={28} className="text-gray-500" />
           </div>
           <div>
-            <p className="text-white font-medium">No avatars yet</p>
-            <p className="text-gray-500 text-sm mt-1">Upload your first avatar to get started</p>
+            <p className="text-white font-medium">还没有数字人</p>
+            <p className="text-gray-500 text-sm mt-1">先上传一张照片，创建你的第一个数字人吧</p>
           </div>
         </div>
       ) : (
@@ -174,13 +174,13 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        if (window.confirm('Delete this avatar?')) {
+                        if (window.confirm('确定要删除这个数字人吗？')) {
                           deleteMutation.mutate(avatar.id)
                         }
                       }}
                       className="absolute top-2 left-2 w-6 h-6 rounded-full bg-red-600/80 backdrop-blur-sm flex items-center justify-center
                                  opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-500"
-                      title="Delete avatar"
+                      title="删除数字人"
                     >
                       {deleteMutation.isPending ? (
                         <Loader2 size={11} className="text-white animate-spin" />
@@ -202,7 +202,7 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                                      ? 'bg-primary-600 opacity-100'
                                      : 'bg-surface-800/80 opacity-0 group-hover:opacity-100 hover:bg-primary-600/60'
                                    }`}
-                        title="Edit personality"
+                        title="编辑性格设定"
                       >
                         <Settings2 size={11} className="text-white" />
                       </button>
@@ -217,24 +217,24 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                       <span className={`text-xs ${status.color}`}>{status.label}</span>
                       <div className="ml-auto flex items-center gap-1.5">
                         {avatar.avatar_metadata?.system_prompt && (
-                          <span title="Custom personality" aria-label="Has custom personality" className="text-[10px] text-primary-400">🧠</span>
+                          <span title="自定义性格" aria-label="已设置自定义性格" className="text-[10px] text-primary-400">🧠</span>
                         )}
                         {avatar.voice_id ? (
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              if (window.confirm('Unassign the cloned voice from this avatar?')) {
+                              if (window.confirm('确定要解除这个数字人的克隆声音吗？')) {
                                 unsetVoiceMutation.mutate(avatar.id)
                               }
                             }}
                             className="text-[10px] text-primary-300 hover:text-red-400 transition-colors flex items-center gap-0.5"
-                            title="Voice attached — click to unassign"
-                            aria-label="Unassign voice from this avatar"
+                            title="已绑定声音 — 点击解除绑定"
+                            aria-label="解除这个数字人的声音绑定"
                           >
                             <Mic2 size={9} />
                           </button>
                         ) : (
-                          <span title="No custom voice" aria-label="No custom voice" className="text-[10px] text-gray-600 flex items-center gap-0.5">
+                          <span title="未绑定自定义声音" aria-label="未绑定自定义声音" className="text-[10px] text-gray-600 flex items-center gap-0.5">
                             <MicOff size={9} />
                           </span>
                         )}
@@ -256,7 +256,7 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                   <div className="flex items-center gap-2">
                     <Settings2 size={14} className="text-primary-400" />
                     <span className="text-sm font-semibold text-white">
-                      Personality — <span className="text-primary-400">{av.name}</span>
+                      性格设定 — <span className="text-primary-400">{av.name}</span>
                     </span>
                   </div>
                   <button onClick={() => setEditingId(null)} className="btn-icon">
@@ -265,7 +265,7 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                 </div>
 
                 <div className="space-y-1.5 mb-3">
-                  <label className="text-xs font-medium text-gray-400">Display name</label>
+                  <label className="text-xs font-medium text-gray-400">显示名称</label>
                   <input
                     type="text"
                     value={draftName}
@@ -273,18 +273,18 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                     className="w-full px-3 py-2 rounded-xl bg-surface-700/80 border border-white/10 text-white text-sm
                                placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50
                                focus:border-primary-500/40 transition-all duration-200"
-                    placeholder="Avatar name"
+                    placeholder="数字人名称"
                   />
                 </div>
 
                 <p className="text-xs text-gray-500 mb-2">
-                  System prompt sent to the LLM at the start of every conversation with this avatar.
+                  每次与这个数字人对话开始时，发送给大模型的系统提示词。
                 </p>
 
                 <textarea
                   value={draftPrompt}
                   onChange={(e) => setDraftPrompt(e.target.value)}
-                  placeholder="You are a friendly assistant named Alex. Respond conversationally and keep answers concise…"
+                  placeholder="你是一位名叫 Alex 的友好助手。请以对话方式回应，并保持回答简洁…"
                   rows={4}
                   className="w-full px-3 py-2.5 rounded-xl bg-surface-700/80 border border-white/10 text-white text-sm
                              placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50
@@ -292,13 +292,13 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                 />
 
                 <div className="flex items-center justify-between mt-3">
-                  <span className="text-xs text-gray-600">{draftPrompt.length} chars</span>
+                  <span className="text-xs text-gray-600">{draftPrompt.length} 字</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingId(null)}
                       className="btn-ghost text-sm px-3 py-1.5"
                     >
-                      Cancel
+                      取消
                     </button>
                     <button
                       onClick={() => savePrompt(editingId)}
@@ -306,7 +306,7 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
                       className="btn-primary text-sm px-4 py-1.5 rounded-lg"
                     >
                       {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
-                      Save
+                      保存
                     </button>
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export function AvatarList({ selectedAvatar, onSelectAvatar }: AvatarListProps) 
       {selectedAvatar && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-500/10 border border-primary-500/20 animate-slide-up">
           <Check size={14} className="text-primary-400 flex-shrink-0" />
-          <p className="text-sm text-primary-300">Avatar selected — go to Chat to start talking!</p>
+          <p className="text-sm text-primary-300">已选择数字人 — 去聊天页开始对话吧！</p>
         </div>
       )}
     </div>

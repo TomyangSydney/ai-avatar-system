@@ -21,7 +21,7 @@ export function SettingsPanel() {
 
   const saveProfile = async () => {
     if (isGuest) {
-      toast.error('Sign in with a real account to edit your profile')
+      toast.error('请登录真实账号后再编辑个人资料')
       return
     }
     setSavingProfile(true)
@@ -31,14 +31,14 @@ export function SettingsPanel() {
       if (username && username !== user?.username) update.username = username
       if (email && email !== user?.email) update.email = email
       if (Object.keys(update).length === 0) {
-        toast('Nothing to update', { icon: 'ℹ️' })
+        toast('没有需要更新的内容', { icon: 'ℹ️' })
         return
       }
       const updated = await api.updateProfile(update)
       if (token) setAuth(token, updated)
-      toast.success('Profile updated')
+      toast.success('个人资料已更新')
     } catch (err: unknown) {
-      toast.error((err as ApiError)?.response?.data?.detail || 'Could not save profile')
+      toast.error((err as ApiError)?.response?.data?.detail || '保存个人资料失败')
     } finally {
       setSavingProfile(false)
     }
@@ -46,15 +46,15 @@ export function SettingsPanel() {
 
   const changePassword = async () => {
     if (isGuest) {
-      toast.error('Sign in with a real account to change your password')
+      toast.error('请登录真实账号后再修改密码')
       return
     }
     if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters')
+      toast.error('密码至少需要 8 个字符')
       return
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match')
+      toast.error('两次输入的密码不一致')
       return
     }
     setSavingPassword(true)
@@ -62,9 +62,9 @@ export function SettingsPanel() {
       await api.updateProfile({ password: newPassword })
       setNewPassword('')
       setConfirmPassword('')
-      toast.success('Password updated')
+      toast.success('密码已更新')
     } catch (err: unknown) {
-      toast.error((err as ApiError)?.response?.data?.detail || 'Could not change password')
+      toast.error((err as ApiError)?.response?.data?.detail || '修改密码失败')
     } finally {
       setSavingPassword(false)
     }
@@ -73,16 +73,16 @@ export function SettingsPanel() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-10 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-black gradient-text mb-2">Settings</h1>
-        <p className="text-gray-400">Manage your account and preferences.</p>
+        <h1 className="text-3xl font-black gradient-text mb-2">设置</h1>
+        <p className="text-gray-400">管理你的账号和偏好设置。</p>
       </div>
 
       {isGuest && (
         <div className="card-glow mb-6 flex items-start gap-3">
           <User size={16} className="text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm text-white font-semibold">You&apos;re signed in as a guest.</p>
-            <p className="text-xs text-gray-400 mt-1">Sign out and register an account to save your profile and access multi-device sync.</p>
+            <p className="text-sm text-white font-semibold">你当前以游客身份登录。</p>
+            <p className="text-xs text-gray-400 mt-1">退出登录并注册一个账号，即可保存个人资料并使用多设备同步。</p>
           </div>
         </div>
       )}
@@ -91,34 +91,34 @@ export function SettingsPanel() {
       <div className="card flex flex-col gap-5">
         <div className="flex items-center gap-2">
           <User size={16} className="text-primary-400" />
-          <h2 className="text-xl font-bold text-white">Profile</h2>
+          <h2 className="text-xl font-bold text-white">个人资料</h2>
         </div>
         <div className="divider" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300">Full name</label>
+            <label className="text-sm font-medium text-gray-300">姓名</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               className="input-field"
-              placeholder="Your name"
+              placeholder="你的姓名"
               disabled={isGuest}
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300">Username</label>
+            <label className="text-sm font-medium text-gray-300">用户名</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input-field"
-              placeholder="username"
+              placeholder="用户名"
               disabled={isGuest}
             />
           </div>
           <div className="space-y-1.5 md:col-span-2">
-            <label className="text-sm font-medium text-gray-300">Email</label>
+            <label className="text-sm font-medium text-gray-300">邮箱</label>
             <input
               type="email"
               value={email}
@@ -135,7 +135,7 @@ export function SettingsPanel() {
           className="btn-primary w-full md:w-auto md:self-end"
         >
           {savingProfile ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-          Save changes
+          保存修改
         </button>
       </div>
 
@@ -143,30 +143,30 @@ export function SettingsPanel() {
       <div className="card flex flex-col gap-5 mt-6">
         <div className="flex items-center gap-2">
           <KeyRound size={16} className="text-primary-400" />
-          <h2 className="text-xl font-bold text-white">Password</h2>
+          <h2 className="text-xl font-bold text-white">密码</h2>
         </div>
         <div className="divider" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300">New password</label>
+            <label className="text-sm font-medium text-gray-300">新密码</label>
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="input-field"
-              placeholder="At least 8 characters"
+              placeholder="至少 8 个字符"
               disabled={isGuest}
               autoComplete="new-password"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300">Confirm new password</label>
+            <label className="text-sm font-medium text-gray-300">确认新密码</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="input-field"
-              placeholder="Repeat your password"
+              placeholder="再次输入密码"
               disabled={isGuest}
               autoComplete="new-password"
             />
@@ -178,7 +178,7 @@ export function SettingsPanel() {
           className="btn-primary w-full md:w-auto md:self-end"
         >
           {savingPassword ? <Loader2 size={15} className="animate-spin" /> : <KeyRound size={15} />}
-          Update password
+          更新密码
         </button>
       </div>
 
@@ -186,21 +186,21 @@ export function SettingsPanel() {
       <div className="card flex flex-col gap-5 mt-6 border border-red-500/20">
         <div className="flex items-center gap-2">
           <Trash2 size={16} className="text-red-400" />
-          <h2 className="text-xl font-bold text-white">Danger zone</h2>
+          <h2 className="text-xl font-bold text-white">危险操作区</h2>
         </div>
         <div className="divider" />
         <p className="text-sm text-gray-400">
-          Sign out of this device. Your avatars, voices, and conversations remain on the server.
+          退出当前设备上的登录。你的数字人、声音和对话记录仍会保留在服务器上。
         </p>
         <button
           onClick={() => {
             api.logout()
             clearAuth()
-            toast('Signed out', { icon: '👋' })
+            toast('已退出登录', { icon: '👋' })
           }}
           className="btn-secondary w-full md:w-auto md:self-end"
         >
-          Sign out
+          退出登录
         </button>
       </div>
     </div>

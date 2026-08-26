@@ -19,23 +19,23 @@ interface VoiceProfile {
 }
 
 const SUPPORTED_LANGUAGES: { code: string; label: string }[] = [
-  { code: 'en', label: '🇺🇸 English' },
-  { code: 'es', label: '🇪🇸 Spanish' },
-  { code: 'fr', label: '🇫🇷 French' },
-  { code: 'de', label: '🇩🇪 German' },
-  { code: 'zh', label: '🇨🇳 Chinese' },
-  { code: 'ja', label: '🇯🇵 Japanese' },
-  { code: 'pt', label: '🇧🇷 Portuguese' },
-  { code: 'hi', label: '🇮🇳 Hindi' },
-  { code: 'it', label: '🇮🇹 Italian' },
-  { code: 'ko', label: '🇰🇷 Korean' },
+  { code: 'en', label: '🇺🇸 英语' },
+  { code: 'es', label: '🇪🇸 西班牙语' },
+  { code: 'fr', label: '🇫🇷 法语' },
+  { code: 'de', label: '🇩🇪 德语' },
+  { code: 'zh', label: '🇨🇳 中文' },
+  { code: 'ja', label: '🇯🇵 日语' },
+  { code: 'pt', label: '🇧🇷 葡萄牙语' },
+  { code: 'hi', label: '🇮🇳 印地语' },
+  { code: 'it', label: '🇮🇹 意大利语' },
+  { code: 'ko', label: '🇰🇷 韩语' },
 ]
 
 const PRESET_VOICES: VoiceProfile[] = [
-  { id: 'default-en', name: 'Alex (English)', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
-  { id: 'default-warm', name: 'Jordan (Warm)', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
-  { id: 'default-deep', name: 'Morgan (Deep)', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
-  { id: 'default-es', name: 'Sofia (Spanish)', language: 'es', duration: 0, createdAt: new Date(), isDefault: true },
+  { id: 'default-en', name: 'Alex（英语）', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
+  { id: 'default-warm', name: 'Jordan（温暖）', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
+  { id: 'default-deep', name: 'Morgan（低沉）', language: 'en', duration: 0, createdAt: new Date(), isDefault: true },
+  { id: 'default-es', name: 'Sofia（西班牙语）', language: 'es', duration: 0, createdAt: new Date(), isDefault: true },
 ]
 
 const LANG_FLAGS: Record<string, string> = {
@@ -134,7 +134,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
   const playPreview = useCallback(async (voiceId: string) => {
     // Preset voices have no recorded sample — bail with a helpful toast
     if (voiceId.startsWith('default-')) {
-      toast('Preset voices are previewed in chat', { icon: '🎧' })
+      toast('预设声音请在聊天中试听', { icon: '🎧' })
       return
     }
     if (previewingId === voiceId) {
@@ -148,7 +148,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       const audio = new Audio(url)
       audio.onended = stopPreview
       audio.onerror = () => {
-        toast.error('Could not play preview')
+        toast.error('无法播放试听音频')
         stopPreview()
       }
       previewUrlRef.current = url
@@ -156,7 +156,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       setPreviewingId(voiceId)
       await audio.play()
     } catch {
-      toast.error('Could not load preview')
+      toast.error('无法加载试听音频')
       stopPreview()
     }
   }, [previewingId, stopPreview])
@@ -212,7 +212,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
         })
       }, 1000)
     } catch {
-      toast.error('Microphone access denied')
+      toast.error('无法访问麦克风')
     }
   }, [])
 
@@ -226,11 +226,11 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('audio/')) {
-      toast.error('Please select an audio file (MP3, WAV, M4A, OGG…)')
+      toast.error('请选择音频文件（MP3、WAV、M4A、OGG…）')
       return
     }
     if (file.size > 20 * 1024 * 1024) {
-      toast.error('File must be under 20 MB')
+      toast.error('文件大小不能超过 20 MB')
       return
     }
     setAudioBlob(file)
@@ -256,7 +256,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
 
   const cloneVoice = async () => {
     if (!audioBlob || !newVoiceName.trim()) {
-      toast.error('Please record audio and give the voice a name')
+      toast.error('请先录制音频并填写声音名称')
       return
     }
     setIsCloning(true)
@@ -274,7 +274,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       setVoices(v => [...v, newProfile])
       setSelectedVoice(newProfile.id)
       onVoiceSelect?.(newProfile.id)
-      toast.success(`Voice "${newProfile.name}" cloned!`, { icon: '🎙️' })
+      toast.success(`声音“${newProfile.name}”克隆成功！`, { icon: '🎙️' })
       // Reset
       setAudioBlob(null)
       setAudioUrl(null)
@@ -283,7 +283,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       setStep('select')
     } catch (err: unknown) {
       const detail = (err as ApiError)?.response?.data?.detail || (err as ApiError)?.message
-      toast.error(detail || 'Voice cloning failed — check backend is running')
+      toast.error(detail || '声音克隆失败 — 请检查后端是否正在运行')
     } finally {
       setIsCloning(false)
     }
@@ -299,7 +299,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       setSelectedVoice(PRESET_VOICES[0].id)
       onVoiceSelect?.(PRESET_VOICES[0].id)
     }
-    toast.success('Voice removed')
+    toast.success('声音已删除')
   }
 
   const fmtTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
@@ -310,15 +310,15 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
       <div className="card flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white">Voice Library</h2>
-            <p className="text-sm text-gray-500 mt-0.5">{voices.length} voices available</p>
+            <h2 className="text-xl font-bold text-white">声音库</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{voices.length} 个可用声音</p>
           </div>
           <button
             onClick={() => setStep('record')}
             className="btn-primary px-4 py-2 text-sm"
           >
             <PlusCircle size={15} />
-            Clone Voice
+            克隆声音
           </button>
         </div>
 
@@ -349,10 +349,10 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                   <p className="font-semibold text-sm text-white truncate">{voice.name}</p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     {voice.isDefault ? (
-                      <span className="badge-blue text-xs">Preset</span>
+                      <span className="badge-blue text-xs">预设</span>
                     ) : (
                       <>
-                        <span className="badge-purple text-xs">Custom · {fmtTime(voice.duration)}</span>
+                        <span className="badge-purple text-xs">自定义 · {fmtTime(voice.duration)}</span>
                         {voice.createdAt && (
                           <span className="text-[10px] text-gray-600">
                             {new Date(voice.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
@@ -373,8 +373,8 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                                   ? 'bg-primary-600 text-white'
                                   : 'bg-surface-700/0 hover:bg-primary-600/30 text-gray-500 hover:text-primary-300 opacity-0 group-hover:opacity-100'
                                 }`}
-                    title={isPreviewing ? 'Stop preview' : 'Preview voice sample'}
-                    aria-label={isPreviewing ? 'Stop preview' : 'Preview voice sample'}
+                    title={isPreviewing ? '停止试听' : '试听声音样本'}
+                    aria-label={isPreviewing ? '停止试听' : '试听声音样本'}
                   >
                     {isPreviewing ? <Pause size={12} /> : <Play size={12} />}
                   </button>
@@ -390,7 +390,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                     className="w-7 h-7 rounded-lg bg-red-600/0 hover:bg-red-600/30 flex items-center justify-center
                                text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100
                                transition-all duration-200 flex-shrink-0"
-                    aria-label="Delete voice"
+                    aria-label="删除声音"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -407,7 +407,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
         {/* Select step — show selected voice info */}
         {step === 'select' && (
           <div className="card flex flex-col gap-5 animate-fade-in">
-            <h2 className="text-xl font-bold text-white">Active Voice</h2>
+            <h2 className="text-xl font-bold text-white">当前声音</h2>
             <div className="divider" />
             {(() => {
               const v = voices.find(x => x.id === selectedVoice)
@@ -420,18 +420,18 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                   <div>
                     <p className="text-2xl font-black text-white">{v.name}</p>
                     <div className="flex items-center justify-center gap-2 mt-2">
-                      {v.isDefault ? <span className="badge-blue">Preset Voice</span> : <span className="badge-purple">Custom Clone</span>}
+                      {v.isDefault ? <span className="badge-blue">预设声音</span> : <span className="badge-purple">自定义克隆</span>}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-2">
                     {!v.isDefault && (
                       <button onClick={() => playPreview(v.id)} className="btn-secondary">
-                        {previewingId === v.id ? <><Pause size={16} /> Stop</> : <><Play size={16} /> Preview</>}
+                        {previewingId === v.id ? <><Pause size={16} /> 停止</> : <><Play size={16} /> 试听</>}
                       </button>
                     )}
                     <button onClick={() => setStep('record')} className="btn-secondary">
                       <Wand2 size={16} />
-                      Clone a New Voice
+                      克隆新声音
                     </button>
                   </div>
                 </div>
@@ -444,8 +444,8 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
         {step === 'record' && (
           <div className="card flex flex-col gap-5 animate-fade-in">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Voice Sample</h2>
-              <button onClick={() => setStep('select')} className="btn-ghost text-sm">Cancel</button>
+              <h2 className="text-xl font-bold text-white">声音样本</h2>
+              <button onClick={() => setStep('select')} className="btn-ghost text-sm">取消</button>
             </div>
             <div className="divider" />
 
@@ -461,7 +461,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                       : 'text-gray-400 hover:text-white'
                     }`}
                 >
-                  {mode === 'mic' ? <><Mic size={14} /> Record Mic</> : <><Upload size={14} /> Upload File</>}
+                  {mode === 'mic' ? <><Mic size={14} /> 麦克风录音</> : <><Upload size={14} /> 上传文件</>}
                 </button>
               ))}
             </div>
@@ -471,8 +471,8 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
               <AlertCircle size={16} className="text-accent-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-gray-300">
                 {recordMode === 'mic'
-                  ? <>Record at least <strong className="text-white">10 seconds</strong> of clear speech. Read naturally — avoid background noise.</>
-                  : <>Upload an audio file (MP3, WAV, M4A, OGG) with at least <strong className="text-white">10 seconds</strong> of clear speech.</>
+                  ? <>请录制至少 <strong className="text-white">10 秒钟</strong>清晰的语音。自然朗读，避免背景噪音。</>
+                  : <>请上传包含至少 <strong className="text-white">10 秒钟</strong>清晰语音的音频文件（MP3、WAV、M4A、OGG）。</>
                 }
               </p>
             </div>
@@ -482,7 +482,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
               <div className="flex flex-col items-center gap-6 py-4">
                 <button
                   onClick={isRecording ? stopRecording : startRecording}
-                  aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+                  aria-label={isRecording ? '停止录音' : '开始录音'}
                   className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300
                     ${isRecording
                       ? 'bg-red-600 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-110'
@@ -501,7 +501,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                     {isRecording && <span className="text-base ml-2 text-gray-500">/ {fmtTime(MAX_RECORDING_SECS)}</span>}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
-                    {isRecording ? 'Recording — tap to stop' : 'Tap the mic to start'}
+                    {isRecording ? '录音中 — 点击停止' : '点击麦克风开始录音'}
                   </p>
                 </div>
 
@@ -537,8 +537,8 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
                              text-gray-400 hover:text-white transition-all duration-200 cursor-pointer"
                 >
                   <Upload size={36} className="opacity-60" />
-                  <span className="text-sm font-medium">Click to browse audio file</span>
-                  <span className="text-xs text-gray-600">MP3, WAV, M4A, OGG · max 20 MB</span>
+                  <span className="text-sm font-medium">点击选择音频文件</span>
+                  <span className="text-xs text-gray-600">MP3、WAV、M4A、OGG · 最大 20 MB</span>
                 </button>
               </div>
             )}
@@ -549,12 +549,12 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
         {step === 'name' && audioUrl && (
           <div className="card flex flex-col gap-5 animate-fade-in">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">Name Your Voice</h2>
+              <h2 className="text-xl font-bold text-white">为声音命名</h2>
               <button
                 onClick={() => { setStep('record'); setAudioBlob(null); setAudioUrl(null) }}
                 className="btn-ghost text-sm"
               >
-                <RefreshCw size={14} /> Re-record
+                <RefreshCw size={14} /> 重新录制
               </button>
             </div>
             <div className="divider" />
@@ -563,7 +563,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
             <div className="flex items-center gap-4 px-4 py-3 rounded-xl bg-surface-700/60 border border-white/8">
               <button
                 onClick={togglePlay}
-                aria-label={isPlaying ? 'Pause playback' : 'Play sample'}
+                aria-label={isPlaying ? '暂停播放' : '播放样本'}
                 className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-600 flex items-center justify-center flex-shrink-0 hover:shadow-glow transition-all"
               >
                 {isPlaying ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
@@ -589,13 +589,13 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
 
             {/* Name input */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Voice Name</label>
+              <label className="text-sm font-medium text-gray-300">声音名称</label>
               <input
                 type="text"
                 value={newVoiceName}
                 onChange={(e) => setNewVoiceName(e.target.value)}
                 className="input-field"
-                placeholder="e.g. My Voice, Character A…"
+                placeholder="例如：我的声音、角色 A…"
                 maxLength={40}
                 autoFocus
               />
@@ -603,7 +603,7 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
 
             {/* Language selector */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Language spoken in sample</label>
+              <label className="text-sm font-medium text-gray-300">样本中使用的语言</label>
               <select
                 value={newVoiceLang}
                 onChange={(e) => setNewVoiceLang(e.target.value)}
@@ -624,19 +624,19 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
               {isCloning ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Cloning Voice…
+                  正在克隆声音…
                 </>
               ) : (
                 <>
                   <Wand2 size={18} />
-                  Clone This Voice
+                  克隆此声音
                 </>
               )}
             </button>
 
             {isCloning && (
               <p className="text-xs text-center text-gray-500 animate-pulse">
-                Extracting voice characteristics · Training speaker model…
+                正在提取声音特征 · 正在训练说话人模型…
               </p>
             )}
           </div>
@@ -646,10 +646,10 @@ export function VoicePanel({ onVoiceSelect }: VoicePanelProps = {}) {
         <div className="card-glow flex items-start gap-3 animate-slide-up">
           <Music size={16} className="text-primary-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-white mb-1">How voice cloning works</p>
+            <p className="text-sm font-semibold text-white mb-1">声音克隆的工作原理</p>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Record 10–60 seconds of your voice reading naturally. Chatterbox Multilingual extracts a
-              speaker embedding and applies it as the avatar&apos;s voice during TTS synthesis. 23 languages supported.
+              录制 10–60 秒您自然朗读的声音。Chatterbox Multilingual 会提取说话人嵌入，
+              并在 TTS 合成时将其应用为数字人的声音。支持 23 种语言。
             </p>
           </div>
         </div>

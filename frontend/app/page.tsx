@@ -17,19 +17,19 @@ import { useStore } from '@/store/useStore'
 // by ~150 KB and lets the marketing landing page paint sooner.
 const ChatInterface = dynamic(
   () => import('@/components/ChatInterface').then(m => m.ChatInterface),
-  { ssr: false, loading: () => <PanelLoader label="Connecting…" /> },
+  { ssr: false, loading: () => <PanelLoader label="连接中…" /> },
 )
 const VoicePanel = dynamic(
   () => import('@/components/VoicePanel').then(m => m.VoicePanel),
-  { ssr: false, loading: () => <PanelLoader label="Loading voice studio…" /> },
+  { ssr: false, loading: () => <PanelLoader label="正在加载声音工作室…" /> },
 )
 const HistoryPanel = dynamic(
   () => import('@/components/HistoryPanel').then(m => m.HistoryPanel),
-  { ssr: false, loading: () => <PanelLoader label="Loading history…" /> },
+  { ssr: false, loading: () => <PanelLoader label="正在加载历史记录…" /> },
 )
 const SettingsPanel = dynamic(
   () => import('@/components/SettingsPanel').then(m => m.SettingsPanel),
-  { ssr: false, loading: () => <PanelLoader label="Loading settings…" /> },
+  { ssr: false, loading: () => <PanelLoader label="正在加载设置…" /> },
 )
 
 function PanelLoader({ label }: { label: string }) {
@@ -60,53 +60,53 @@ import {
 const FEATURES = [
   {
     icon: Brain,
-    title: 'LLM-Powered Intelligence',
-    description: 'Claude & GPT-4 drive natural conversations with context-aware, cached prompts.',
+    title: 'LLM 智能驱动',
+    description: 'Claude 与 GPT-4 结合上下文感知的缓存提示，驱动自然流畅的对话。',
     color: 'from-purple-500 to-pink-500',
     glow: 'rgba(168,85,247,0.3)',
   },
   {
     icon: AudioWaveform,
-    title: 'Voice Cloning',
-    description: 'Chatterbox Multilingual clones any voice from a 10-second sample in 23 languages.',
+    title: '声音克隆',
+    description: 'Chatterbox Multilingual 只需 10 秒样本即可克隆任意声音，支持 23 种语言。',
     color: 'from-blue-500 to-cyan-500',
     glow: 'rgba(59,130,246,0.3)',
   },
   {
     icon: Activity,
-    title: 'Lip-Sync Animation',
-    description: 'MuseTalk V1.5 produces photorealistic lip-sync video aligned to the spoken audio.',
+    title: '口型同步动画',
+    description: 'MuseTalk V1.5 生成照片级真实的口型同步视频，与语音音频精确对齐。',
     color: 'from-emerald-500 to-teal-500',
     glow: 'rgba(16,185,129,0.3)',
   },
   {
     icon: Zap,
-    title: 'Streaming Pipeline',
-    description: 'WebSocket streams tokens, audio, and video chunk-by-chunk for low first-byte latency.',
+    title: '流式管道',
+    description: 'WebSocket 逐块流式传输 token、音频和视频，实现极低的首字节延迟。',
     color: 'from-amber-500 to-orange-500',
     glow: 'rgba(245,158,11,0.3)',
   },
   {
     icon: Globe,
-    title: 'Multi-Language',
-    description: 'Whisper STT + Chatterbox TTS support 23 languages end-to-end.',
+    title: '多语言支持',
+    description: 'Whisper STT + Chatterbox TTS 端到端支持 23 种语言。',
     color: 'from-indigo-500 to-blue-500',
     glow: 'rgba(99,102,241,0.3)',
   },
   {
     icon: Shield,
-    title: 'Privacy-First',
-    description: 'Self-host everything — your photos, voices, and conversations stay on your infra.',
+    title: '隐私优先',
+    description: '完全自托管——你的照片、声音和对话数据始终保存在你自己的基础设施上。',
     color: 'from-rose-500 to-pink-500',
     glow: 'rgba(244,63,94,0.3)',
   },
 ]
 
 const STATS = [
-  { value: '23', label: 'Languages' },
-  { value: '<200ms', label: 'First-byte latency' },
-  { value: '2', label: 'LLM backends' },
-  { value: '100%', label: 'Self-hostable' },
+  { value: '23', label: '支持语言' },
+  { value: '<200ms', label: '首字节延迟' },
+  { value: '2', label: 'LLM 后端' },
+  { value: '100%', label: '可自托管' },
 ]
 
 type View = 'home' | 'avatars' | 'chat' | 'voice' | 'history' | 'settings'
@@ -124,14 +124,14 @@ export default function Home() {
 
   const handleVoiceSelect = async (voiceId: string) => {
     if (!selectedAvatar) {
-      toast('Select an avatar first to assign this voice', { icon: '💡' })
+      toast('请先选择数字人再分配声音', { icon: '💡' })
       return
     }
     try {
       await api.setAvatarVoice(selectedAvatar, voiceId)
-      toast.success('Voice assigned to avatar', { icon: '🎙️' })
+      toast.success('声音已分配给数字人', { icon: '🎙️' })
     } catch {
-      toast.error('Failed to assign voice')
+      toast.error('声音分配失败')
     }
   }
 
@@ -154,12 +154,12 @@ export default function Home() {
   }
 
   const navItems: { id: View; icon: typeof Sparkles; label: string; disabled?: boolean }[] = [
-    { id: 'home', icon: Sparkles, label: 'Home' },
-    { id: 'avatars', icon: Camera, label: 'Avatars' },
-    { id: 'voice', icon: Mic2, label: 'Voice' },
-    { id: 'chat', icon: MessageCircle, label: 'Chat', disabled: !selectedAvatar },
-    { id: 'history', icon: History, label: 'History' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'home', icon: Sparkles, label: '首页' },
+    { id: 'avatars', icon: Camera, label: '数字人' },
+    { id: 'voice', icon: Mic2, label: '声音' },
+    { id: 'chat', icon: MessageCircle, label: '对话', disabled: !selectedAvatar },
+    { id: 'history', icon: History, label: '历史' },
+    { id: 'settings', icon: Settings, label: '设置' },
   ]
 
   return (
@@ -205,9 +205,9 @@ export default function Home() {
                 <button
                   onClick={() => { api.logout(); clearAuth() }}
                   className="text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
-                  title="Sign out"
+                  title="退出登录"
                 >
-                  Sign out
+                  退出登录
                 </button>
               </div>
             )}
@@ -235,21 +235,21 @@ export default function Home() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 mb-8 animate-slide-up">
                 <Sparkles size={14} className="text-primary-400" />
-                <span className="text-sm text-primary-300 font-medium">Next-Gen AI Avatar Platform</span>
+                <span className="text-sm text-primary-300 font-medium">新一代 AI 数字人平台</span>
               </div>
 
               {/* Headline */}
               <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                <span className="gradient-text">Talk to</span>
+                <span className="gradient-text">对话</span>
                 <br />
-                <span className="text-white">Any Face,</span>
+                <span className="text-white">任何面孔，</span>
                 <br />
-                <span className="gradient-text-gold">Any Voice.</span>
+                <span className="gradient-text-gold">任何声音。</span>
               </h1>
 
               <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 leading-relaxed animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                Upload a photo, clone a voice, and have real-time AI-powered conversations with
-                photorealistic lip-sync animations. Powered by Claude, Whisper, Chatterbox, and MuseTalk.
+                上传一张照片，克隆一段声音，即可与照片级真实口型同步动画的 AI 实时对话。
+                由 Claude、Whisper、Chatterbox 和 MuseTalk 驱动。
               </p>
 
               {/* CTAs */}
@@ -259,7 +259,7 @@ export default function Home() {
                   className="btn-primary text-base px-8 py-3.5 rounded-2xl group"
                 >
                   <Play size={18} className="group-hover:scale-110 transition-transform" />
-                  Get Started Free
+                  免费开始
                   <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
@@ -267,7 +267,7 @@ export default function Home() {
                   className="btn-secondary text-base px-8 py-3.5 rounded-2xl"
                 >
                   <Mic2 size={18} />
-                  Clone a Voice
+                  克隆声音
                 </button>
               </div>
 
@@ -286,11 +286,11 @@ export default function Home() {
             <section className="px-6 pb-24 max-w-7xl mx-auto">
               <div className="text-center mb-14">
                 <h2 className="text-4xl font-black mb-4">
-                  Everything you need to build
-                  <span className="gradient-text"> avatar experiences</span>
+                  构建数字人体验
+                  <span className="gradient-text">所需的一切</span>
                 </h2>
                 <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                  A complete stack — from voice cloning to lip-sync video — running locally or in the cloud.
+                  从声音克隆到口型同步视频的完整技术栈，可本地运行，也可部署到云端。
                 </p>
               </div>
 
@@ -317,8 +317,8 @@ export default function Home() {
         {view === 'avatars' && (
           <div className="max-w-7xl mx-auto px-6 py-10 animate-fade-in">
             <div className="mb-8">
-              <h1 className="text-3xl font-black gradient-text mb-2">Avatar Studio</h1>
-              <p className="text-gray-400">Upload photos and manage your avatar collection.</p>
+              <h1 className="text-3xl font-black gradient-text mb-2">数字人工作室</h1>
+              <p className="text-gray-400">上传照片，管理你的数字人。</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <AvatarUpload />
@@ -334,7 +334,7 @@ export default function Home() {
                   className="btn-primary text-lg px-10 py-4 rounded-2xl group"
                 >
                   <MessageCircle size={20} />
-                  Start Conversation
+                  开始对话
                   <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
@@ -346,8 +346,8 @@ export default function Home() {
         {view === 'voice' && (
           <div className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
             <div className="mb-8">
-              <h1 className="text-3xl font-black gradient-text mb-2">Voice Studio</h1>
-              <p className="text-gray-400">Clone voices and manage your voice library.</p>
+              <h1 className="text-3xl font-black gradient-text mb-2">声音工作室</h1>
+              <p className="text-gray-400">克隆声音，管理你的声音库。</p>
             </div>
             <VoicePanel onVoiceSelect={handleVoiceSelect} />
           </div>
@@ -357,8 +357,8 @@ export default function Home() {
         {view === 'chat' && selectedAvatar && (
           <div className="max-w-7xl mx-auto px-6 py-10 animate-fade-in">
             <div className="mb-6">
-              <h1 className="text-3xl font-black gradient-text mb-2">Live Conversation</h1>
-              <p className="text-gray-400">Talk to your AI avatar in real time.</p>
+              <h1 className="text-3xl font-black gradient-text mb-2">实时对话</h1>
+              <p className="text-gray-400">与你的 AI 数字人实时对话。</p>
             </div>
             <ChatInterface
               key={`${selectedAvatar}:${resumeSessionId ?? 'new'}`}
@@ -372,10 +372,10 @@ export default function Home() {
         {/* Redirect if no avatar selected for chat */}
         {view === 'chat' && !selectedAvatar && (
           <div className="max-w-7xl mx-auto px-6 py-10 text-center">
-            <p className="text-gray-400 mb-4">Please select an avatar first.</p>
+            <p className="text-gray-400 mb-4">请先选择一个数字人。</p>
             <button onClick={() => setView('avatars')} className="btn-primary">
               <Camera size={18} />
-              Go to Avatar Studio
+              前往数字人工作室
             </button>
           </div>
         )}

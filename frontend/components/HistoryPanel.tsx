@@ -27,13 +27,13 @@ interface ConversationSummary {
 function timeAgo(iso: string): string {
   const then = new Date(iso).getTime()
   const diffSec = Math.max(0, Math.floor((Date.now() - then) / 1000))
-  if (diffSec < 60) return `${diffSec}s ago`
+  if (diffSec < 60) return `${diffSec} 秒前`
   const m = Math.floor(diffSec / 60)
-  if (m < 60) return `${m}m ago`
+  if (m < 60) return `${m} 分钟前`
   const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h ago`
+  if (h < 24) return `${h} 小时前`
   const d = Math.floor(h / 24)
-  if (d < 30) return `${d}d ago`
+  if (d < 30) return `${d} 天前`
   return new Date(iso).toLocaleDateString()
 }
 
@@ -116,7 +116,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
         const msgs = await api.getMessages(sessionId)
         setMessagesById(prev => ({ ...prev, [sessionId]: msgs }))
       } catch {
-        toast.error('Could not load messages')
+        toast.error('无法加载消息')
       } finally {
         setLoadingMessagesId(null)
       }
@@ -124,11 +124,11 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
   }
 
   const handleDelete = async (sessionId: string) => {
-    if (!window.confirm('Delete this conversation? This cannot be undone.')) return
+    if (!window.confirm('确定删除此对话？此操作无法撤销。')) return
     setBusy(sessionId)
     try {
       await api.deleteSession(sessionId)
-      toast.success('Conversation deleted')
+      toast.success('对话已删除')
       setMessagesById(prev => {
         const next = { ...prev }
         delete next[sessionId]
@@ -138,7 +138,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
       queryClient.invalidateQueries({ queryKey: ['sessions'] })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     } catch {
-      toast.error('Could not delete conversation')
+      toast.error('无法删除对话')
     } finally {
       setBusy(null)
     }
@@ -149,9 +149,9 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
     try {
       const blob = await api.exportSession(sessionId)
       downloadBlob(blob, `session-${sessionId.slice(0, 8)}.json`)
-      toast.success('Exported')
+      toast.success('已导出')
     } catch {
-      toast.error('Could not export conversation')
+      toast.error('无法导出对话')
     } finally {
       setBusy(null)
     }
@@ -161,10 +161,10 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
     setSummarizingId(convId)
     try {
       await api.summarizeConversation(convId)
-      toast.success('Summary generated', { icon: '✨' })
+      toast.success('摘要已生成', { icon: '✨' })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     } catch {
-      toast.error('Could not summarize — backend or LLM unavailable')
+      toast.error('无法生成摘要 — 后端或 LLM 不可用')
     } finally {
       setSummarizingId(null)
     }
@@ -179,18 +179,18 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
     if (!renameTarget) return
     const title = renameValue.trim()
     if (!title) {
-      toast.error('Title cannot be empty')
+      toast.error('标题不能为空')
       return
     }
     setBusy(renameTarget.sessionId)
     try {
       await api.renameConversation(renameTarget.convId, title)
-      toast.success('Renamed')
+      toast.success('已重命名')
       setRenameTarget(null)
       setRenameValue('')
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
     } catch {
-      toast.error('Could not rename')
+      toast.error('无法重命名')
     } finally {
       setBusy(null)
     }
@@ -206,10 +206,10 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
     <div className="max-w-4xl mx-auto px-6 py-10 animate-fade-in">
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-black gradient-text mb-2">Conversation History</h1>
-          <p className="text-gray-400">Re-open, review, export, and clean up your past sessions.</p>
+          <h1 className="text-3xl font-black gradient-text mb-2">对话历史</h1>
+          <p className="text-gray-400">重新打开、查看、导出并清理您过去的会话。</p>
         </div>
-        <button onClick={() => refetch()} className="btn-icon" title="Refresh" aria-label="Refresh">
+        <button onClick={() => refetch()} className="btn-icon" title="刷新" aria-label="刷新">
           <RefreshCw size={15} />
         </button>
       </div>
@@ -220,9 +220,9 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by avatar name, conversation title, or session id…"
+          placeholder="按数字人名称、对话标题或会话 ID 搜索…"
           className="input-field pl-11"
-          aria-label="Search conversations"
+          aria-label="搜索对话"
         />
       </div>
 
@@ -236,9 +236,9 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
             <MessageCircle size={28} className="text-gray-500" />
           </div>
           <div>
-            <p className="text-white font-medium">No conversations yet</p>
+            <p className="text-white font-medium">暂无对话记录</p>
             <p className="text-gray-500 text-sm mt-1">
-              {query ? 'Nothing matches that search.' : 'Start a chat with an avatar to see it here.'}
+              {query ? '没有匹配的搜索结果。' : '与数字人开始聊天后，对话会显示在这里。'}
             </p>
           </div>
         </div>
@@ -251,7 +251,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
             const msgs = messagesById[s.id]
             const isRenaming = renameTarget?.sessionId === s.id
             const isBusy = busy === s.id
-            const title = convo?.title || av?.name || 'Untitled conversation'
+            const title = convo?.title || av?.name || '未命名对话'
             return (
               <div key={s.id} className="glass-card rounded-2xl overflow-hidden border border-white/8">
                 <div className="flex items-center gap-4 px-5 py-4">
@@ -281,12 +281,12 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                           }}
                           maxLength={200}
                           className="input-field py-1.5 text-sm"
-                          aria-label="Conversation title"
+                          aria-label="对话标题"
                         />
                         <button
                           onClick={handleSaveRename}
                           className="btn-icon text-green-400"
-                          aria-label="Save title"
+                          aria-label="保存标题"
                           disabled={isBusy}
                         >
                           {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} />}
@@ -294,7 +294,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                         <button
                           onClick={() => { setRenameTarget(null); setRenameValue('') }}
                           className="btn-icon"
-                          aria-label="Cancel rename"
+                          aria-label="取消重命名"
                         >
                           <X size={14} />
                         </button>
@@ -307,7 +307,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                           s.status === 'paused' ? 'badge-amber' :
                           'badge-gray'
                         }`}>
-                          {s.status}
+                          {s.status === 'active' ? '活跃' : s.status === 'paused' ? '已暂停' : s.status}
                         </span>
                       </div>
                     )}
@@ -315,7 +315,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                       <Clock size={11} />
                       <span>{timeAgo(s.started_at)}</span>
                       {av && <><span>·</span><span>{av.name}</span></>}
-                      {convo && <><span>·</span><span>{convo.message_count} msgs</span></>}
+                      {convo && <><span>·</span><span>{convo.message_count} 条消息</span></>}
                       <span>·</span>
                       <span className="font-mono">{s.id.slice(0, 8)}</span>
                     </div>
@@ -325,8 +325,8 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                       <button
                         onClick={() => handleStartRename(convo.id, s.id, convo.title)}
                         className="btn-icon"
-                        title="Rename conversation"
-                        aria-label="Rename conversation"
+                        title="重命名对话"
+                        aria-label="重命名对话"
                       >
                         <Pencil size={13} />
                       </button>
@@ -335,8 +335,8 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                       <button
                         onClick={() => handleSummarize(convo.id)}
                         className="btn-icon"
-                        title={convo.summary ? 'Regenerate AI summary' : 'Generate AI summary'}
-                        aria-label="Summarize conversation with AI"
+                        title={convo.summary ? '重新生成 AI 摘要' : '生成 AI 摘要'}
+                        aria-label="使用 AI 生成对话摘要"
                         disabled={summarizingId === convo.id}
                       >
                         {summarizingId === convo.id ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
@@ -345,8 +345,8 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                     <button
                       onClick={() => handleExport(s.id)}
                       className="btn-icon"
-                      title="Export as JSON"
-                      aria-label="Export conversation"
+                      title="导出为 JSON"
+                      aria-label="导出对话"
                       disabled={isBusy}
                     >
                       {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
@@ -354,8 +354,8 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                     <button
                       onClick={() => toggleExpand(s.id)}
                       className="btn-icon"
-                      title="Preview messages"
-                      aria-label="Toggle message preview"
+                      title="预览消息"
+                      aria-label="切换消息预览"
                       aria-expanded={isExpanded}
                     >
                       {loadingMessagesId === s.id ? <Loader2 size={13} className="animate-spin" /> : <MessageCircle size={13} />}
@@ -364,17 +364,17 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                       <button
                         onClick={() => onResume(s.avatar_id, s.id)}
                         className="btn-primary text-xs px-3 py-1.5 rounded-lg"
-                        title="Open in chat"
+                        title="在聊天中打开"
                       >
                         <Play size={12} />
-                        Open
+                        打开
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(s.id)}
                       className="btn-icon text-gray-500 hover:text-red-400"
-                      title="Delete conversation"
-                      aria-label="Delete conversation"
+                      title="删除对话"
+                      aria-label="删除对话"
                       disabled={isBusy}
                     >
                       <Trash2 size={13} />
@@ -397,9 +397,9 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                       </div>
                     )}
                     {!msgs ? (
-                      <p className="text-sm text-gray-500">Loading…</p>
+                      <p className="text-sm text-gray-500">加载中…</p>
                     ) : msgs.length === 0 ? (
-                      <p className="text-sm text-gray-500">No messages in this session.</p>
+                      <p className="text-sm text-gray-500">此会话暂无消息。</p>
                     ) : (
                       <div className="space-y-2 max-h-72 overflow-y-auto messages-scroll">
                         {msgs.map((m) => (
@@ -407,7 +407,7 @@ export function HistoryPanel({ onResume }: HistoryPanelProps) {
                             <span className={`font-mono text-xs px-1.5 py-0.5 rounded ${
                               m.role === 'user' ? 'bg-accent-700/40 text-accent-200' : 'bg-primary-700/40 text-primary-200'
                             }`}>
-                              {m.role === 'user' ? 'YOU' : 'AI'}
+                              {m.role === 'user' ? '我' : 'AI'}
                             </span>
                             <span className="text-gray-200 flex-1 leading-relaxed whitespace-pre-wrap">{m.content}</span>
                           </div>

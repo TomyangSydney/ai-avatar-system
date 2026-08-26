@@ -80,9 +80,9 @@ export function AuthModal() {
       const data = await api.login(loginEmail, loginPassword)
       const profile = await api.getProfile()
       setAuth(data.access_token, profile)
-      toast.success(`Welcome back, ${profile.username}!`, { icon: '👋' })
+      toast.success(`欢迎回来，${profile.username}！`, { icon: '👋' })
     } catch (err: unknown) {
-      toast.error((err as ApiError)?.response?.data?.detail || 'Invalid credentials')
+      toast.error((err as ApiError)?.response?.data?.detail || '邮箱或密码错误')
     } finally {
       setIsLoading(false)
     }
@@ -98,9 +98,9 @@ export function AuthModal() {
       const data = await api.login(regEmail, regPassword)
       const profile = await api.getProfile()
       setAuth(data.access_token, profile)
-      toast.success(`Account created! Welcome, ${profile.username}!`, { icon: '🎉' })
+      toast.success(`账号创建成功！欢迎，${profile.username}！`, { icon: '🎉' })
     } catch (err: unknown) {
-      toast.error((err as ApiError)?.response?.data?.detail || 'Registration failed')
+      toast.error((err as ApiError)?.response?.data?.detail || '注册失败')
     } finally {
       setIsLoading(false)
     }
@@ -108,8 +108,8 @@ export function AuthModal() {
 
   const continueAsGuest = () => {
     // Set a synthetic guest user — backend falls back to "demo-user" when no JWT
-    setAuth('guest', { id: 'demo-user', email: 'guest@local', username: 'Guest' })
-    toast('Continuing as guest — data may not persist', { icon: '👤' })
+    setAuth('guest', { id: 'demo-user', email: 'guest@local', username: '游客' })
+    toast('以游客模式继续——数据可能不会保存', { icon: '👤' })
   }
 
   return (
@@ -128,7 +128,7 @@ export function AuthModal() {
           </div>
           <div className="text-center">
             <h1 id="auth-modal-title" className="text-2xl font-black gradient-text">AvatarAI</h1>
-            <p id="auth-modal-desc" className="text-sm text-gray-500 mt-0.5">Sign in to your account</p>
+            <p id="auth-modal-desc" className="text-sm text-gray-500 mt-0.5">登录你的账号</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export function AuthModal() {
                   : 'text-gray-400 hover:text-white'
                 }`}
             >
-              {t === 'login' ? <><LogIn size={14} /> Sign In</> : <><UserPlus size={14} /> Register</>}
+              {t === 'login' ? <><LogIn size={14} /> 登录</> : <><UserPlus size={14} /> 注册</>}
             </button>
           ))}
         </div>
@@ -153,7 +153,7 @@ export function AuthModal() {
         {tab === 'login' && (
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Email</label>
+              <label className="text-sm font-medium text-gray-300">邮箱</label>
               <input
                 type="email"
                 value={loginEmail}
@@ -165,7 +165,7 @@ export function AuthModal() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Password</label>
+              <label className="text-sm font-medium text-gray-300">密码</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -187,7 +187,7 @@ export function AuthModal() {
             </div>
             <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 rounded-xl mt-2">
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />}
-              Sign In
+              登录
             </button>
           </form>
         )}
@@ -197,29 +197,29 @@ export function AuthModal() {
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-300">Username</label>
+                <label className="text-sm font-medium text-gray-300">用户名</label>
                 <input
                   type="text"
                   value={regUsername}
                   onChange={e => setRegUsername(e.target.value)}
                   className="input-field"
-                  placeholder="cooluser"
+                  placeholder="用户名"
                   required
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-300">Full Name</label>
+                <label className="text-sm font-medium text-gray-300">姓名（选填）</label>
                 <input
                   type="text"
                   value={regFullName}
                   onChange={e => setRegFullName(e.target.value)}
                   className="input-field"
-                  placeholder="Optional"
+                  placeholder="选填"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Email</label>
+              <label className="text-sm font-medium text-gray-300">邮箱</label>
               <input
                 type="email"
                 value={regEmail}
@@ -230,14 +230,14 @@ export function AuthModal() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Password</label>
+              <label className="text-sm font-medium text-gray-300">密码</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={regPassword}
                   onChange={e => setRegPassword(e.target.value)}
                   className="input-field pr-10"
-                  placeholder="Min 8 characters"
+                  placeholder="最少 8 个字符"
                   minLength={8}
                   required
                 />
@@ -252,7 +252,7 @@ export function AuthModal() {
             </div>
             <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 rounded-xl mt-2">
               {isLoading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
-              Create Account
+              创建账号
             </button>
           </form>
         )}
@@ -260,7 +260,7 @@ export function AuthModal() {
         {/* Divider */}
         <div className="flex items-center gap-3 my-5">
           <div className="flex-1 h-px bg-white/10" />
-          <span className="text-xs text-gray-600">or</span>
+          <span className="text-xs text-gray-600">或</span>
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
@@ -270,10 +270,10 @@ export function AuthModal() {
           className="btn-secondary w-full py-2.5 rounded-xl text-sm"
         >
           <User size={15} />
-          Continue as Guest
+          游客模式继续
         </button>
         <p className="text-xs text-center text-gray-600 mt-3">
-          Guest data is scoped to this browser session only.
+          游客数据仅保留在当前浏览器会话中。
         </p>
       </div>
     </div>
