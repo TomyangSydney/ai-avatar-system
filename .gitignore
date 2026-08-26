@@ -5,6 +5,10 @@ frontend/node_modules/
 venv/
 env/
 
+# Pre-downloaded wheels for offline docker builds (heavy, host-specific)
+backend/wheels/
+backend/req.nodeps.txt
+
 # Environment
 .env
 .env.local

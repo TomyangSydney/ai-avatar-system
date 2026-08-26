@@ -21,26 +21,23 @@ RUN apt-get update && apt-get install -y \
     && ln -sf python3 /usr/bin/python \
     && ln -sf pip3 /usr/bin/pip
 
-# Copy requirements
-COPY requirements.txt .
-
-# Install Python dependencies. chatterbox-tts is excluded here and installed
-# with --no-deps below: its wheels hard-pin torch==2.6.0/diffusers==0.29.0,
-# which conflicts with this project's torch 2.2 stack. Its other runtime
-# imports are listed explicitly in requirements.txt.
-# torch is excluded and pinned to the CPU wheel below — this deployment runs
-# MuseTalk on a REMOTE GPU server (AVATAR_ENGINE=musetalk_remote); the local
-# backend only needs CPU torch (whisper int8 / chatterbox fallback), and the
-# CUDA wheels are 4x larger and repeatedly failed to download intact.
-RUN grep -vE '^(chatterbox-tts|torch==|torchvision==|torchaudio==)' requirements.txt > req.nodeps.txt && \
-    pip install --no-cache-dir --retries 10 --timeout 90 \
-      torch==2.2.0+cpu torchvision==0.17.0+cpu torchaudio==2.2.0+cpu \
-      --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir --retries 10 --timeout 90 \
-      -i https://mirrors.aliyun.com/pypi/simple/ \
+# Copy requirements + pre-downloaded wheels.
+# The wheels/ dir is populated on the host (pip download for cp310/manylinux)
+# because in-build downloads kept corrupting on this network. Installing
+# offline (--no-index) makes the build deterministic and network-independent.
+# chatterbox-tts installs with --no-deps: its metadata hard-pins torch 2.6 /
+# diffusers 0.29, conflicting with this stack; its real imports are in wheels/.
+# torch is the CPU build — MuseTalk runs on a remote GPU server
+# (AVATAR_ENGINE=musetalk_remote), local torch only serves whisper int8 and
+# the chatterbox TTS fallback.
+COPY requirements.txt ./
+COPY wheels/ ./wheels/
+RUN grep -vE '^(chatterbox-tts)' requirements.txt > req.nodeps.txt && \
+    pip install --no-cache-dir --no-index --find-links=wheels \
+      torch==2.2.0+cpu torchvision==0.17.0+cpu torchaudio==2.2.0+cpu && \
+    pip install --no-cache-dir --no-index --find-links=wheels \
       -r req.nodeps.txt && \
-    pip install --no-cache-dir --no-deps \
-      -i https://mirrors.aliyun.com/pypi/simple/ \
+    pip install --no-cache-dir --no-index --no-deps --find-links=wheels \
       chatterbox-tts==0.1.2
 
 # Copy application code
