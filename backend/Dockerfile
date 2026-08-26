@@ -34,14 +34,14 @@ COPY requirements.txt .
 # CUDA wheels are 4x larger and repeatedly failed to download intact.
 RUN grep -vE '^(chatterbox-tts|torch==|torchvision==|torchaudio==)' requirements.txt > req.nodeps.txt && \
     pip install --no-cache-dir --retries 10 --timeout 90 \
+      torch==2.2.0+cpu torchvision==0.17.0+cpu torchaudio==2.2.0+cpu \
+      --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir --retries 10 --timeout 90 \
       -i https://pypi.tuna.tsinghua.edu.cn/simple \
       -r req.nodeps.txt && \
     pip install --no-cache-dir --no-deps \
       -i https://pypi.tuna.tsinghua.edu.cn/simple \
-      chatterbox-tts==0.1.2 && \
-    pip install --no-cache-dir --retries 10 --timeout 90 \
-      torch==2.2.0+cpu torchvision==0.17.0+cpu torchaudio==2.2.0+cpu \
-      --index-url https://download.pytorch.org/whl/cpu
+      chatterbox-tts==0.1.2
 
 # Copy application code
 COPY . .
