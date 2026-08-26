@@ -28,20 +28,20 @@ COPY requirements.txt .
 # with --no-deps below: its wheels hard-pin torch==2.6.0/diffusers==0.29.0,
 # which conflicts with this project's torch 2.2 stack. Its other runtime
 # imports are listed explicitly in requirements.txt.
-RUN grep -v '^chatterbox-tts' requirements.txt > req.nodeps.txt && \
+# torch is excluded and pinned to the CPU wheel below — this deployment runs
+# MuseTalk on a REMOTE GPU server (AVATAR_ENGINE=musetalk_remote); the local
+# backend only needs CPU torch (whisper int8 / chatterbox fallback), and the
+# CUDA wheels are 4x larger and repeatedly failed to download intact.
+RUN grep -vE '^(chatterbox-tts|torch==|torchvision==|torchaudio==)' requirements.txt > req.nodeps.txt && \
     pip install --no-cache-dir --retries 10 --timeout 90 \
       -i https://pypi.tuna.tsinghua.edu.cn/simple \
       -r req.nodeps.txt && \
     pip install --no-cache-dir --no-deps \
       -i https://pypi.tuna.tsinghua.edu.cn/simple \
-      chatterbox-tts==0.1.2
-
-# Install PyTorch with CUDA 11.8 (matches base image)
-RUN pip install --no-cache-dir \
-    torch==2.2.0+cu118 \
-    torchvision==0.17.0+cu118 \
-    torchaudio==2.2.0+cu118 \
-    --index-url https://download.pytorch.org/whl/cu118
+      chatterbox-tts==0.1.2 && \
+    pip install --no-cache-dir --retries 10 --timeout 90 \
+      torch==2.2.0+cpu torchvision==0.17.0+cpu torchaudio==2.2.0+cpu \
+      --index-url https://download.pytorch.org/whl/cpu
 
 # Copy application code
 COPY . .
