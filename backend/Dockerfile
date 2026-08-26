@@ -29,7 +29,7 @@ COPY requirements.txt .
 # which conflicts with this project's torch 2.2 stack. Its other runtime
 # imports are listed explicitly in requirements.txt.
 RUN grep -v '^chatterbox-tts' requirements.txt > req.nodeps.txt && \
-    pip install --no-cache-dir -r req.nodeps.txt && \
+    pip install --no-cache-dir --retries 10 --timeout 90 -r req.nodeps.txt && \
     pip install --no-cache-dir --no-deps chatterbox-tts==0.1.2
 
 # Install PyTorch with CUDA 11.8 (matches base image)
