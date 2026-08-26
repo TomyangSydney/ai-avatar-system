@@ -58,7 +58,11 @@ faster-whisper>=1.0.0
 # Every chatterbox release hard-pins torch==2.6.0/diffusers==0.29.0, conflicting
 # with this project's torch 2.2 stack. Installed with --no-deps (see Dockerfile);
 # its real runtime imports are satisfied explicitly below.
-chatterbox-tts==0.1.2
+# 0.1.4+ ships chatterbox.mtl_tts (multilingual, what app/services/tts.py imports);
+# 0.1.2 only has the English-only layout. ml_dtypes>=0.5 provides float4_e2m1fn
+# which the import chain requires.
+chatterbox-tts==0.1.4
+ml_dtypes>=0.5.0
 resemble-perth
 conformer
 s3tokenizer

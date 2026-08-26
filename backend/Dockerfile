@@ -38,7 +38,7 @@ RUN grep -vE '^(chatterbox-tts)' requirements.txt > req.nodeps.txt && \
     pip install --no-cache-dir --no-index --find-links=wheels \
       -r req.nodeps.txt && \
     pip install --no-cache-dir --no-index --no-deps --find-links=wheels \
-      chatterbox-tts==0.1.2
+      chatterbox-tts==0.1.4
 
 # Copy application code
 COPY . .
