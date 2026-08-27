@@ -35,6 +35,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.background import BackgroundTask
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("musetalk_server")
@@ -338,7 +339,20 @@ async def animate(
         # the response streamed the file.
         final_path = os.path.join(SERVE_DIR, f"{os.path.basename(td)}_result.mp4")
         os.replace(output_path, final_path)
-        return FileResponse(final_path, media_type="video/mp4", filename="animated.mp4")
+
+        def _cleanup() -> None:
+            # Runs AFTER the response has been fully streamed (BackgroundTask).
+            try:
+                os.remove(final_path)
+            except OSError:
+                pass
+
+        return FileResponse(
+            final_path,
+            media_type="video/mp4",
+            filename="animated.mp4",
+            background=BackgroundTask(_cleanup),
+        )
 
 
 # uvicorn runs the app in an event loop; heavy model loading must not block it.
