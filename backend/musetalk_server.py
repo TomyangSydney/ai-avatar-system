@@ -45,6 +45,9 @@ STATE: dict = {"ready": False, "error": None, "device": None}
 # Model handles, populated by _load_models() on startup.
 _MODELS: dict = {}
 
+# Finished videos land here before streaming — outside any TemporaryDirectory.
+SERVE_DIR = tempfile.mkdtemp(prefix="mt_serve_")
+
 
 # ── auth ──────────────────────────────────────────────────────────────────────
 
@@ -329,7 +332,13 @@ async def animate(
         if not os.path.exists(output_path):
             raise HTTPException(status_code=500, detail="inference produced no output")
 
-        return FileResponse(output_path, media_type="video/mp4", filename="animated.mp4")
+        # CRITICAL: move the result OUT of the TemporaryDirectory before it is
+        # cleaned up. Returning FileResponse(output_path) inside the with-block
+        # raced the context manager — the dir (and video) was deleted before
+        # the response streamed the file.
+        final_path = os.path.join(SERVE_DIR, f"{os.path.basename(td)}_result.mp4")
+        os.replace(output_path, final_path)
+        return FileResponse(final_path, media_type="video/mp4", filename="animated.mp4")
 
 
 # uvicorn runs the app in an event loop; heavy model loading must not block it.
