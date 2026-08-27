@@ -252,10 +252,21 @@ def _run_inference(image_path: str, audio_path: str, output_path: str, coord_cac
         cv2.imwrite(f"{frames_dir}/{str(i).zfill(8)}.png", combined)
 
     tmp_vid = output_path + ".tmp.mp4"
-    os.system(f"ffmpeg -y -v warning -r {FPS} -f image2 -i {frames_dir}/%08d.png "
-              f"-vcodec libx264 -vf format=yuv420p -crf 18 {tmp_vid}")
-    os.system(f"ffmpeg -y -v warning -i {audio_path} -i {tmp_vid} {output_path}")
-    shutil.rmtree(frames_dir, exist_ok=True)
+
+    def _ffmpeg(*args: str) -> None:
+        """Run ffmpeg, raising with its stderr on failure (os.system swallowed errors)."""
+        import subprocess
+        r = subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", *args],
+            capture_output=True, text=True,
+        )
+        if r.returncode != 0:
+            raise RuntimeError(f"ffmpeg failed ({r.returncode}): {r.stderr[-800:]}")
+
+    _ffmpeg("-r", str(FPS), "-f", "image2", "-i", f"{frames_dir}/%08d.png",
+            "-vcodec", "libx264", "-vf", "format=yuv420p", "-crf", "18", tmp_vid)
+    _ffmpeg("-i", audio_path, "-i", tmp_vid, output_path)
+    shutil.rmtree(frames_dir, ignore_errors=True)
     if os.path.exists(tmp_vid):
         os.remove(tmp_vid)
 
